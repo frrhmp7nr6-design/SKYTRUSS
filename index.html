@@ -17,6 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
       --cyberdyne-red: #DC1414;
@@ -294,7 +295,7 @@
     }
 
     /* ============================================================
-       SCENE 1: ROLE SELECTION SCREEN (ESPORTS CHARACTER SELECT)
+       SCENE 1: PROFILE SETUP & ROLE SELECTION SCREEN
        ============================================================ */
     #role-scene {
       width: 100%;
@@ -303,7 +304,7 @@
       flex-direction: column;
       background-color: var(--hazard-black);
       background-image:
-        radial-gradient(circle at 50% 42%, rgba(220, 20, 20, 0.14) 0%, transparent 55%),
+        radial-gradient(circle at 50% 48%, rgba(220, 20, 20, 0.14) 0%, transparent 55%),
         linear-gradient(rgba(74, 85, 104, 0.11) 1px, transparent 1px),
         linear-gradient(90deg, rgba(74, 85, 104, 0.11) 1px, transparent 1px);
       background-size: 100% 100%, 32px 32px, 32px 32px;
@@ -313,54 +314,113 @@
       padding-right: env(safe-area-inset-right);
     }
 
+    .onboarding-banner {
+      background: linear-gradient(90deg, rgba(220, 20, 20, 0.18) 0%, rgba(18, 20, 26, 0.92) 50%, rgba(220, 20, 20, 0.12) 100%);
+      border-bottom: 1px solid rgba(220, 20, 20, 0.45);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .onboarding-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .onboarding-main-title {
+      font-family: var(--font-header);
+      font-size: clamp(18px, 2.6vw, 24px);
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: var(--hud-white);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .onboarding-step-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: var(--cyberdyne-red);
+      color: var(--hud-white);
+    }
+
+    .onboarding-sub {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: rgba(240, 240, 240, 0.82);
+    }
+
+    .sprite-notice {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
     .role-stage-grid {
       flex: 1;
       display: grid;
       grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr auto;
-      gap: 10px;
-      padding: 12px 16px 14px;
+      grid-template-rows: auto auto auto;
+      gap: 14px;
+      padding: 14px 16px 20px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       position: relative;
     }
 
-    /* Desktop / iPad Landscape 3-Column Layout matching Reference 1 */
-    @media (min-width: 820px) {
+    @media (min-width: 860px) {
       .role-stage-grid {
-        grid-template-columns: 310px 1fr 310px;
+        grid-template-columns: 320px 1fr 320px;
         grid-template-rows: 1fr;
         align-items: center;
-        padding: 18px 28px;
-        gap: 20px;
+        padding: 18px 34px;
+        gap: 24px;
         overflow: hidden;
       }
     }
 
-    /* LEFT COLUMN: HEADSHOT GRID + CALLSIGN INPUT */
+    /* LEFT COLUMN: CALLSIGN + HEADSHOT GRID */
     .roster-panel {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       z-index: 5;
+      background: rgba(18, 20, 26, 0.65);
+      border: 1px solid rgba(74, 85, 104, 0.5);
+      padding: 14px;
+      border-radius: 4px;
     }
 
-    .section-kicker {
+    .step-label {
       font-family: var(--font-header);
-      font-size: 15px;
-      font-weight: 900;
-      letter-spacing: 2px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
       color: var(--hud-white);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .section-kicker span {
+    .step-label span {
       font-family: var(--font-mono);
       font-size: 10px;
       color: var(--cyberdyne-red);
-      letter-spacing: 1.4px;
+      letter-spacing: 1.2px;
     }
 
     .headshot-grid {
@@ -372,8 +432,8 @@
     .headshot-tile {
       position: relative;
       aspect-ratio: 1 / 1;
-      background: linear-gradient(180deg, rgba(41, 44, 52, 0.72) 0%, rgba(10, 10, 12, 0.92) 100%);
-      border: 1px solid rgba(74, 85, 104, 0.65);
+      background: linear-gradient(180deg, rgba(41, 44, 52, 0.85) 0%, rgba(10, 10, 12, 0.96) 100%);
+      border: 1px solid rgba(74, 85, 104, 0.7);
       border-radius: 4px;
       overflow: hidden;
       cursor: pointer;
@@ -385,7 +445,7 @@
     }
 
     .headshot-tile:hover {
-      border-color: rgba(240, 240, 240, 0.65);
+      border-color: rgba(240, 240, 240, 0.7);
     }
 
     .headshot-tile.active {
@@ -419,44 +479,43 @@
       z-index: 2;
       width: 100%;
       padding: 3px 4px;
-      background: rgba(10, 10, 12, 0.86);
+      background: rgba(10, 10, 12, 0.88);
       font-family: var(--font-mono);
       font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      border-top: 1px solid rgba(74, 85, 104, 0.4);
+      border-top: 1px solid rgba(74, 85, 104, 0.45);
     }
 
     .headshot-tile.active .headshot-label {
       color: var(--cyberdyne-red);
     }
 
-    /* CENTER COLUMN: FULL-BODY CHARACTER PEDESTAL */
+    /* CENTER COLUMN: INTERACTIVE THREE.JS 3D ROBOT STAGE */
     .showcase-stage {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 290px;
+      min-height: 340px;
       height: 100%;
     }
 
-    /* Vertical hologram light beam behind character (matches Reference 1) */
     .holo-beam {
       position: absolute;
-      top: 4%;
-      bottom: 12%;
-      width: min(240px, 56vw);
+      top: 2%;
+      bottom: 14%;
+      width: min(250px, 58vw);
       background: linear-gradient(
         180deg,
         rgba(74, 85, 104, 0.04) 0%,
-        rgba(74, 85, 104, 0.2) 55%,
+        rgba(74, 85, 104, 0.18) 55%,
         rgba(220, 20, 20, 0.18) 100%
       );
       border-left: 1px solid rgba(255, 255, 255, 0.07);
@@ -464,50 +523,71 @@
       pointer-events: none;
     }
 
-    .character-figure-wrap {
+    .three-viewport {
       position: relative;
-      z-index: 3;
-      height: clamp(230px, 44vh, 430px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      z-index: 4;
+      width: min(320px, 84vw);
+      height: clamp(270px, 48vh, 410px);
+      cursor: grab;
+      touch-action: pan-y;
     }
 
-    .character-figure-wrap img {
-      max-height: 100%;
-      max-width: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.85));
-      transition: transform 0.2s ease, opacity 0.2s ease;
+    .three-viewport:active {
+      cursor: grabbing;
+    }
+
+    .three-viewport canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .drag-hint-pill {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      pointer-events: none;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: rgba(240, 240, 240, 0.7);
+      background: rgba(10, 10, 12, 0.72);
+      border: 1px solid rgba(74, 85, 104, 0.55);
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
     }
 
     /* Glowing Floor Pedestal Disc */
     .pedestal-disc {
       position: relative;
       z-index: 2;
-      width: min(260px, 64vw);
-      height: 34px;
-      margin-top: -16px;
+      width: min(250px, 60vw);
+      height: 32px;
+      margin-top: -18px;
       border-radius: 50%;
       background: radial-gradient(
         ellipse at center,
         rgba(240, 240, 240, 0.35) 0%,
-        rgba(220, 20, 20, 0.22) 52%,
+        rgba(220, 20, 20, 0.24) 52%,
         rgba(10, 10, 12, 0.9) 75%
       );
       border: 2px solid rgba(240, 240, 240, 0.35);
       box-shadow: 0 0 28px rgba(220, 20, 20, 0.35);
     }
 
-    /* Angle & Role Cycle Controls under Pedestal */
+    /* Role Cycle Bar under Pedestal */
     .cycle-bar {
       position: relative;
       z-index: 5;
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 12px;
-      background: rgba(18, 20, 26, 0.86);
+      margin-top: 10px;
+      background: rgba(18, 20, 26, 0.88);
       border: 1px solid var(--galvanized-steel);
       border-radius: 4px;
       padding: 4px 10px;
@@ -530,8 +610,8 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--hud-white);
-      opacity: 0.85;
-      min-width: 112px;
+      opacity: 0.9;
+      min-width: 118px;
       text-align: center;
     }
 
@@ -545,6 +625,7 @@
       border: 1px solid rgba(74, 85, 104, 0.55);
       padding: 16px;
       position: relative;
+      border-radius: 4px;
     }
 
     .specs-panel::before {
@@ -573,7 +654,7 @@
 
     .role-main-name {
       font-family: var(--font-header);
-      font-size: clamp(20px, 2.5vw, 26px);
+      font-size: clamp(20px, 2.5vw, 25px);
       font-weight: 900;
       letter-spacing: 1.5px;
       color: var(--hud-white);
@@ -584,7 +665,7 @@
     .role-division {
       font-family: var(--font-mono);
       font-size: 11px;
-      color: rgba(240, 240, 240, 0.68);
+      color: rgba(240, 240, 240, 0.72);
     }
 
     .stat-list {
@@ -627,14 +708,13 @@
       transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* Side Arrow Button on Right Edge (Matching Reference 1) */
     .next-role-arrow {
       position: absolute;
       right: 8px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 12;
-      background: rgba(10, 10, 12, 0.72);
+      background: rgba(10, 10, 12, 0.78);
       border: 1px solid var(--galvanized-steel);
       color: var(--hud-white);
       width: 36px;
@@ -701,11 +781,12 @@
     }
 
     .profile-badge-avatar {
-      width: 76px;
-      height: 76px;
+      width: 84px;
+      height: 84px;
       border-radius: 6px;
       border: 2px solid var(--cyberdyne-red);
       object-fit: cover;
+      object-position: top center;
       background: #12141a;
     }
   </style>
@@ -738,54 +819,68 @@
     </div>
   </div>
 
-  <!-- SCENE 1: FIRST-LOGIN PROFILE & ROLE SELECTION -->
+  <!-- SCENE 1: FIRST-LOGIN PROFILE SETUP & ROLE SELECTION -->
   <div id="role-scene" class="hidden">
     <div class="scene-topbar">
       <div class="hud-brand">
         <img src="./images/skytruss.webp" alt="SKYTRUSS" />
         <span>SKYTRUSS</span>
       </div>
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-size:10px; color:var(--cyberdyne-red); letter-spacing:1.2px; font-weight:700;">PROFILE SETUP</span>
-        <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
+      <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
+    </div>
+
+    <div class="onboarding-banner">
+      <div class="onboarding-title-group">
+        <div class="onboarding-main-title">
+          PROFILE SETUP
+          <span class="onboarding-step-badge">REQUIRED</span>
+        </div>
+        <div class="onboarding-sub">
+          Enter your callsign and select your company role to initialize your SKYTRUSS profile.
+        </div>
+      </div>
+      <div id="sprite-warning" class="sprite-notice hidden">
+        ADD <strong>roles.webp</strong> OR <strong>roles.png</strong> TO <strong>SKYTRUSS/images/</strong> FOR PORTRAITS
       </div>
     </div>
 
     <div class="role-stage-grid">
-      <!-- LEFT: HEADSHOT SELECTOR GRID & CALLSIGN -->
+      <!-- LEFT: STEP 1 CALLSIGN + STEP 2 HEADSHOT GRID -->
       <div class="roster-panel">
-        <div class="section-kicker">
-          SELECT YOUR ROLE
-          <span>6 UNITS</span>
+        <div class="field">
+          <label for="profile-callsign">1. OPERATOR CALLSIGN / FULL NAME</label>
+          <input type="text" id="profile-callsign" placeholder="Enter your name" maxlength="28" />
+        </div>
+
+        <div class="step-label">
+          2. SELECT YOUR ROLE
+          <span>6 ROLES</span>
         </div>
 
         <div class="headshot-grid" id="headshot-grid"></div>
-
-        <div class="field" style="margin-top:4px;">
-          <label for="profile-callsign">OPERATOR CALLSIGN / NAME</label>
-          <input type="text" id="profile-callsign" placeholder="Enter your name" maxlength="24" />
-        </div>
       </div>
 
-      <!-- CENTER: FULL-BODY CHARACTER TURNAROUND STAGE -->
+      <!-- CENTER: INTERACTIVE 3D TERMINATOR CHASSIS STAGE -->
       <div class="showcase-stage">
         <div class="holo-beam"></div>
-        <div class="character-figure-wrap">
-          <img id="stage-fullbody-img" src="" alt="Selected Role Chassis" />
+
+        <div class="three-viewport" id="three-viewport">
+          <div class="drag-hint-pill">DRAG TO ROTATE 360°</div>
         </div>
+
         <div class="pedestal-disc"></div>
 
         <div class="cycle-bar">
-          <button type="button" class="cycle-btn" onclick="cycleAngle(-1)" aria-label="Previous Angle">◀</button>
-          <div class="cycle-readout" id="angle-readout">ANGLE 1 / 4</div>
-          <button type="button" class="cycle-btn" onclick="cycleAngle(1)" aria-label="Next Angle">▶</button>
+          <button type="button" class="cycle-btn" onclick="cycleRole(-1)" aria-label="Previous Role">◀</button>
+          <div class="cycle-readout" id="role-cycle-readout">ROLE 1 / 6</div>
+          <button type="button" class="cycle-btn" onclick="cycleRole(1)" aria-label="Next Role">▶</button>
         </div>
       </div>
 
-      <!-- RIGHT: ROLE SPECS & CONFIRM BUTTON -->
+      <!-- RIGHT: STEP 3 ROLE SPECS & CONFIRMATION -->
       <div class="specs-panel">
         <div class="role-title-block">
-          <div class="role-code-tag" id="role-code-tag">UNIT 01 // FIELD OPS</div>
+          <div class="role-code-tag" id="role-code-tag">UNIT 01 // FRONT-LINE OPS</div>
           <div class="role-main-name" id="role-main-name">THE SALESMAN</div>
           <div class="role-division" id="role-division">Client Acquisition & Bid Negotiation</div>
         </div>
@@ -793,17 +888,16 @@
         <div class="stat-list" id="role-stat-list"></div>
 
         <button type="button" class="btn-signin" id="confirm-role-btn" onclick="confirmRoleProfile()">
-          CONFIRM ROLE
+          COMPLETE PROFILE SETUP
         </button>
         <div class="status-msg" id="role-status"></div>
       </div>
 
-      <!-- Quick Next-Character Arrow on Right Edge -->
       <button type="button" class="next-role-arrow" onclick="cycleRole(1)" aria-label="Next Role">❯</button>
     </div>
   </div>
 
-  <!-- SCENE 2: MAIN POST-LOGIN COMMAND HUB -->
+  <!-- SCENE 2: MAIN POST-ONBOARDING COMMAND HUB -->
   <div id="main-scene" class="hidden">
     <div class="scene-topbar">
       <div class="hud-brand">
@@ -811,7 +905,7 @@
         <span>SKYTRUSS</span>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-        <button class="btn-ghost" onclick="openRoleSelector()">Change Role</button>
+        <button class="btn-ghost" onclick="openRoleSelector()">Edit Profile</button>
         <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
       </div>
     </div>
@@ -865,27 +959,39 @@
     })();
 
     // ============================================================
-    // 2. SUPABASE CONFIG
+    // 2. SUPABASE CONFIG & ROLE DEFINITIONS
     // ============================================================
     const SUPABASE_URL = "https://fwpnbbkyhugzppclsgbl.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QU5rvS7F-VfmocfgP1SqKw_gymqv9bQ";
     const sb = SUPABASE_URL.startsWith("http") ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-    // Path to your character turnaround sprite sheet (image 2)
-    const ROLES_SPRITE_PATH = "./images/roles.png";
+    const ROLES_SPRITE_CANDIDATES = [
+      "./images/roles.webp",
+      "./images/roles.png",
+      "./images/roles.jpg"
+    ];
 
-    // Role definitions mapped to your 2nd image sheet
-    // Grid coordinates: row (0 = top, 1 = bottom), colStart (0..11 across the 12 poses), poseCount
     const ROLES = [
       {
         id: "salesman",
+        unitNum: "01",
         code: "UNIT 01 // FRONT-LINE OPS",
         shortName: "Salesman",
         name: "The Salesman",
         division: "Client Acquisition & Bid Negotiation",
         row: 0,
         colStart: 0,
-        poseCount: 2,
+        chassis: {
+          metalColor: 0xb8c2cc,
+          metalness: 0.92,
+          roughness: 0.2,
+          visorColor: 0xdc1414,
+          bulk: 1.0,
+          helmet: false,
+          datapads: false,
+          subArms: false,
+          heavyArmor: false
+        },
         stats: [
           { label: "NEGOTIATION", value: 94 },
           { label: "SPEED", value: 88 },
@@ -895,13 +1001,24 @@
       },
       {
         id: "estimator",
+        unitNum: "02",
         code: "UNIT 02 // ANALYTICS CORE",
         shortName: "Estimator",
         name: "The Estimator",
         division: "Takeoffs, Blueprints & Cost Calculation",
         row: 0,
         colStart: 2,
-        poseCount: 2,
+        chassis: {
+          metalColor: 0x6c7682,
+          metalness: 0.85,
+          roughness: 0.34,
+          visorColor: 0xff2a2a,
+          bulk: 0.92,
+          helmet: false,
+          datapads: true,
+          subArms: false,
+          heavyArmor: false
+        },
         stats: [
           { label: "PRECISION", value: 98 },
           { label: "ANALYTICS", value: 95 },
@@ -911,13 +1028,24 @@
       },
       {
         id: "superintendent",
+        unitNum: "03",
         code: "UNIT 03 // HEAVY FIELD",
         shortName: "Super",
         name: "The Superintendent",
         division: "On-Site Jobsite Command & Safety",
         row: 0,
         colStart: 4,
-        poseCount: 4,
+        chassis: {
+          metalColor: 0x7b848f,
+          metalness: 0.82,
+          roughness: 0.32,
+          visorColor: 0xf59e0b,
+          bulk: 1.24,
+          helmet: true,
+          datapads: false,
+          subArms: false,
+          heavyArmor: true
+        },
         stats: [
           { label: "ARMOR", value: 96 },
           { label: "COMMAND", value: 92 },
@@ -927,13 +1055,24 @@
       },
       {
         id: "office_manager",
+        unitNum: "04",
         code: "UNIT 04 // LOGISTICS",
         shortName: "Office Mgr",
         name: "The Office Manager",
         division: "Multi-Tasking Operations & Dispatch",
         row: 1,
         colStart: 0,
-        poseCount: 4,
+        chassis: {
+          metalColor: 0x88929e,
+          metalness: 0.86,
+          roughness: 0.28,
+          visorColor: 0x38bdf8,
+          bulk: 0.94,
+          helmet: false,
+          datapads: true,
+          subArms: true,
+          heavyArmor: false
+        },
         stats: [
           { label: "MULTI-TASK", value: 97 },
           { label: "SPEED", value: 91 },
@@ -943,13 +1082,24 @@
       },
       {
         id: "admin",
+        unitNum: "05",
         code: "UNIT 05 // SYSTEM CONTROL",
         shortName: "Admin",
         name: "The Admin",
         division: "Permissions, Compliance & Data Integrity",
         row: 1,
         colStart: 6,
-        poseCount: 2,
+        chassis: {
+          metalColor: 0x454d59,
+          metalness: 0.88,
+          roughness: 0.26,
+          visorColor: 0xdc1414,
+          bulk: 1.04,
+          helmet: false,
+          datapads: true,
+          subArms: false,
+          heavyArmor: true
+        },
         stats: [
           { label: "SECURITY", value: 96 },
           { label: "PRECISION", value: 93 },
@@ -959,13 +1109,24 @@
       },
       {
         id: "project_manager",
+        unitNum: "06",
         code: "UNIT 06 // TACTICAL LEAD",
         shortName: "Project Mgr",
         name: "The Project Manager",
         division: "Schedule Execution, Budget & Delivery",
         row: 1,
         colStart: 4,
-        poseCount: 4,
+        chassis: {
+          metalColor: 0x9aa3ad,
+          metalness: 0.9,
+          roughness: 0.24,
+          visorColor: 0xdc1414,
+          bulk: 1.12,
+          helmet: false,
+          datapads: false,
+          subArms: false,
+          heavyArmor: true
+        },
         stats: [
           { label: "COMMAND", value: 95 },
           { label: "ANALYTICS", value: 91 },
@@ -978,109 +1139,504 @@
     let currentUser = null;
     let authMode = "login";
     let selectedRoleIdx = 0;
-    let selectedAngleIdx = 0;
-    let slicedAssets = {}; // { roleId: { headshot: dataUrl, poses: [dataUrl, ...] } }
+    let slicedHeadshots = {};
+    let spriteLoaded = false;
 
     // ============================================================
-    // 3. SPRITE SHEET SLICER & CHECKERBOARD TRANSPARENCY CLEANER
+    // 3. THREE.JS 3D TERMINATOR CHASSIS BUILDER & TURNTABLE
     // ============================================================
-    function sliceSpriteSheet() {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = function () {
-          const w = img.width;
-          const h = img.height;
-          const rowH = Math.floor(h / 2);
-          const colW = w / 12;
+    let threeState = {
+      initialized: false,
+      scene: null,
+      camera: null,
+      renderer: null,
+      robotGroup: null,
+      headGroup: null,
+      leftArm: null,
+      rightArm: null,
+      subArmL: null,
+      subArmR: null,
+      coreLight: null,
+      rotY: 0.25,
+      targetRotY: 0.25,
+      isDragging: false,
+      lastX: 0,
+      animId: null
+    };
 
-          // Helper to crop a region, remove light/gray checkerboard pixels, and return PNG dataURL
-          function extractCleanCrop(sx, sy, sw, sh, isHeadshot = false) {
-            const c = document.createElement("canvas");
-            c.width = Math.round(sw);
-            c.height = Math.round(sh);
-            const ctx = c.getContext("2d");
-            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    function init3DStage() {
+      const container = document.getElementById("three-viewport");
+      if (!container || threeState.initialized || !window.THREE) return;
 
-            const imgData = ctx.getImageData(0, 0, c.width, c.height);
-            const d = imgData.data;
-            for (let i = 0; i < d.length; i += 4) {
-              const r = d[i], g = d[i + 1], b = d[i + 2];
-              const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
-              // Strip neutral light/mid gray checkerboard squares while preserving metallic shading
-              if (maxDiff < 10 && r > 145) {
-                d[i + 3] = 0;
-              }
-            }
-            ctx.putImageData(imgData, 0, 0);
+      const width = container.clientWidth || 300;
+      const height = container.clientHeight || 360;
 
-            if (!isHeadshot) return c.toDataURL("image/png");
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
+      camera.position.set(0, 1.15, 4.35);
+      camera.lookAt(0, 1.02, 0);
 
-            // Frame headshot tightly around upper head & shoulders
-            const hc = document.createElement("canvas");
-            hc.width = 180;
-            hc.height = 180;
-            const hctx = hc.getContext("2d");
-            const cropSize = c.width * 0.72;
-            const offsetX = (c.width - cropSize) * 0.5;
-            const offsetY = c.height * 0.02;
-            hctx.drawImage(c, offsetX, offsetY, cropSize, cropSize, 0, 0, 180, 180);
-            return hc.toDataURL("image/png");
-          }
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      container.appendChild(renderer.domElement);
 
-          ROLES.forEach((role) => {
-            const topY = role.row * rowH + rowH * 0.07; // Skip top text label
-            const bodyH = rowH * 0.91;
-            const poses = [];
+      // Studio Three-Point + Cyberdyne Rim Lighting
+      const ambient = new THREE.AmbientLight(0xdbeafe, 0.75);
+      scene.add(ambient);
 
-            for (let p = 0; p < role.poseCount; p++) {
-              const sx = (role.colStart + p) * colW;
-              poses.push(extractCleanCrop(sx, topY, colW, bodyH, false));
-            }
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.85);
+      keyLight.position.set(2.8, 4.5, 3.6);
+      scene.add(keyLight);
 
-            const headshot = extractCleanCrop(role.colStart * colW, topY, colW, bodyH, true);
-            slicedAssets[role.id] = { headshot, poses };
-          });
+      const fillLight = new THREE.DirectionalLight(0x94a3b8, 0.9);
+      fillLight.position.set(-3.2, 2.2, 2.0);
+      scene.add(fillLight);
 
-          resolve();
-        };
+      const rimLight = new THREE.DirectionalLight(0xdc1414, 1.65);
+      rimLight.position.set(0, 2.5, -3.5);
+      scene.add(rimLight);
 
-        img.onerror = function () {
-          // Fallback SVG silhouettes if roles.png has not been placed in ./images/ yet
-          ROLES.forEach((role, idx) => {
-            const hue = idx * 12;
-            const svg = `data:image/svg+xml;utf8,${encodeURIComponent(
-              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360">
-                <rect x="78" y="20" width="44" height="50" rx="14" fill="#4A5568" stroke="#DC1414" stroke-width="3"/>
-                <circle cx="91" cy="42" r="4" fill="#DC1414"/>
-                <circle cx="109" cy="42" r="4" fill="#DC1414"/>
-                <rect x="58" y="78" width="84" height="115" rx="12" fill="#292C34" stroke="#718096" stroke-width="3"/>
-                <rect x="34" y="84" width="18" height="105" rx="8" fill="#4A5568"/>
-                <rect x="148" y="84" width="18" height="105" rx="8" fill="#4A5568"/>
-                <rect x="66" y="200" width="26" height="135" rx="8" fill="#4A5568"/>
-                <rect x="108" y="200" width="26" height="135" rx="8" fill="#4A5568"/>
-              </svg>`
-            )}`;
-            slicedAssets[role.id] = { headshot: svg, poses: [svg] };
-          });
-          resolve();
-        };
+      const underGlow = new THREE.PointLight(0xdc1414, 1.2, 4.5);
+      underGlow.position.set(0, 0.05, 0.4);
+      scene.add(underGlow);
 
-        img.src = ROLES_SPRITE_PATH;
+      threeState.scene = scene;
+      threeState.camera = camera;
+      threeState.renderer = renderer;
+      threeState.initialized = true;
+
+      // Pointer Drag Rotation (Mouse + Touch)
+      const onDown = (clientX) => {
+        threeState.isDragging = true;
+        threeState.lastX = clientX;
+      };
+      const onMove = (clientX) => {
+        if (!threeState.isDragging) return;
+        const dx = clientX - threeState.lastX;
+        threeState.lastX = clientX;
+        threeState.targetRotY += dx * 0.014;
+      };
+      const onUp = () => {
+        threeState.isDragging = false;
+      };
+
+      container.addEventListener("mousedown", (e) => onDown(e.clientX));
+      window.addEventListener("mousemove", (e) => onMove(e.clientX));
+      window.addEventListener("mouseup", onUp);
+
+      container.addEventListener("touchstart", (e) => {
+        if (e.touches[0]) onDown(e.touches[0].clientX);
+      }, { passive: true });
+      container.addEventListener("touchmove", (e) => {
+        if (e.touches[0]) onMove(e.touches[0].clientX);
+      }, { passive: true });
+      container.addEventListener("touchend", onUp);
+
+      window.addEventListener("resize", () => {
+        if (!threeState.renderer || !container.clientWidth) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        threeState.camera.aspect = w / h;
+        threeState.camera.updateProjectionMatrix();
+        threeState.renderer.setSize(w, h);
       });
+
+      build3DRobotMesh(ROLES[selectedRoleIdx]);
+      animate3D();
+    }
+
+    function build3DRobotMesh(role) {
+      if (!threeState.scene) return;
+      if (threeState.robotGroup) {
+        threeState.scene.remove(threeState.robotGroup);
+      }
+
+      const cfg = role.chassis;
+      const root = new THREE.Group();
+
+      // Materials
+      const primaryMetal = new THREE.MeshStandardMaterial({
+        color: cfg.metalColor,
+        metalness: cfg.metalness,
+        roughness: cfg.roughness
+      });
+      const darkJoint = new THREE.MeshStandardMaterial({
+        color: 0x1a1e24,
+        metalness: 0.78,
+        roughness: 0.42
+      });
+      const chromePiston = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        metalness: 0.96,
+        roughness: 0.14
+      });
+      const visorMat = new THREE.MeshStandardMaterial({
+        color: cfg.visorColor,
+        emissive: cfg.visorColor,
+        emissiveIntensity: 2.2,
+        roughness: 0.2
+      });
+
+      const b = cfg.bulk;
+
+      // 1. HEAD & SKULL ASSEMBLY
+      const headGroup = new THREE.Group();
+      headGroup.position.set(0, 1.84, 0);
+
+      const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.135, 24, 20), primaryMetal);
+      cranium.scale.set(0.92, 1.12, 1.02);
+      headGroup.add(cranium);
+
+      const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.11, 0.15), darkJoint);
+      jaw.position.set(0, -0.075, 0.025);
+      headGroup.add(jaw);
+
+      const chinPlate = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.05, 0.14), primaryMetal);
+      chinPlate.position.set(0, -0.105, 0.035);
+      headGroup.add(chinPlate);
+
+      // Glowing Optical Visor / Eyes
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.032, 0.05), visorMat);
+      visor.position.set(0, 0.005, 0.118);
+      headGroup.add(visor);
+
+      // Superintendent Hard-Hat Helmet Option
+      if (cfg.helmet) {
+        const dome = new THREE.Mesh(
+          new THREE.SphereGeometry(0.158, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
+          primaryMetal
+        );
+        dome.position.set(0, 0.025, 0);
+        headGroup.add(dome);
+
+        const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.165, 0.175, 0.018, 24), darkJoint);
+        brim.position.set(0, 0.035, 0.02);
+        headGroup.add(brim);
+      }
+
+      root.add(headGroup);
+
+      // Neck & Hydraulic Pistons
+      const neckCore = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.068, 0.14, 16), darkJoint);
+      neckCore.position.set(0, 1.68, -0.01);
+      root.add(neckCore);
+
+      [-0.045, 0.045].forEach((nx) => {
+        const piston = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.14, 12), chromePiston);
+        piston.position.set(nx, 1.68, 0.02);
+        piston.rotation.z = nx * 1.4;
+        root.add(piston);
+      });
+
+      // 2. TORSO, CHEST ARMOR & RIBCAGE
+      const chest = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.23 * b, 0.17 * b, 0.34, 18),
+        primaryMetal
+      );
+      chest.scale.set(1.0, 1.0, 0.68);
+      chest.position.set(0, 1.45, 0);
+      root.add(chest);
+
+      // Pectoral Armor Plates
+      [-0.095 * b, 0.095 * b].forEach((px) => {
+        const pec = new THREE.Mesh(
+          new THREE.BoxGeometry(0.16 * b, 0.15, 0.07),
+          cfg.heavyArmor ? primaryMetal : darkJoint
+        );
+        pec.position.set(px, 1.49, 0.115);
+        pec.rotation.y = px > 0 ? -0.18 : 0.18;
+        root.add(pec);
+      });
+
+      // Glowing Cyberdyne Chest Core Node
+      const coreBezel = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 20), darkJoint);
+      coreBezel.rotation.x = Math.PI / 2;
+      coreBezel.position.set(0, 1.44, 0.135);
+      root.add(coreBezel);
+
+      const coreGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.045, 20), visorMat);
+      coreGlow.rotation.x = Math.PI / 2;
+      coreGlow.position.set(0, 1.44, 0.138);
+      root.add(coreGlow);
+
+      // Segmented Spine & Abdomen
+      const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.32, 16), darkJoint);
+      spine.position.set(0, 1.16, -0.02);
+      root.add(spine);
+
+      for (let r = 0; r < 3; r++) {
+        const rib = new THREE.Mesh(
+          new THREE.TorusGeometry(0.135 * b - r * 0.01, 0.016, 10, 24),
+          chromePiston
+        );
+        rib.rotation.x = Math.PI / 2;
+        rib.scale.set(1.0, 0.72, 1.0);
+        rib.position.set(0, 1.24 - r * 0.065, 0.01);
+        root.add(rib);
+      }
+
+      // Pelvis / Tactical Belt
+      const pelvis = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.165 * b, 0.13 * b, 0.16, 16),
+        cfg.heavyArmor ? primaryMetal : darkJoint
+      );
+      pelvis.scale.set(1.0, 1.0, 0.75);
+      pelvis.position.set(0, 0.96, 0);
+      root.add(pelvis);
+
+      // 3. ARMS & HANDS (LEFT & RIGHT)
+      function buildArm(side) {
+        const armGroup = new THREE.Group();
+        armGroup.position.set(side * 0.28 * b, 1.54, 0);
+
+        // Shoulder Pauldron
+        const shoulder = new THREE.Mesh(
+          new THREE.SphereGeometry(cfg.heavyArmor ? 0.115 : 0.088, 18, 16),
+          primaryMetal
+        );
+        armGroup.add(shoulder);
+
+        // Upper Arm
+        const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.052 * b, 0.044 * b, 0.31, 14), primaryMetal);
+        upperArm.position.set(side * 0.02, -0.18, 0);
+        upperArm.rotation.z = side * -0.08;
+        armGroup.add(upperArm);
+
+        // Elbow Joint
+        const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.048, 14, 12), darkJoint);
+        elbow.position.set(side * 0.035, -0.34, 0);
+        armGroup.add(elbow);
+
+        // Forearm
+        const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.048 * b, 0.038 * b, 0.3, 14), primaryMetal);
+        forearm.position.set(side * 0.04, -0.5, 0.03);
+        forearm.rotation.x = -0.16;
+        armGroup.add(forearm);
+
+        // Estimator / Office Manager Forearm Holo-Datapad
+        if (cfg.datapads) {
+          const pad = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.11, 0.02), visorMat);
+          pad.position.set(side * 0.068, -0.49, 0.04);
+          pad.rotation.x = -0.16;
+          armGroup.add(pad);
+        }
+
+        // Mechanical Hand
+        const hand = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.085, 0.035), darkJoint);
+        hand.position.set(side * 0.042, -0.68, 0.06);
+        armGroup.add(hand);
+
+        return armGroup;
+      }
+
+      const leftArm = buildArm(-1);
+      const rightArm = buildArm(1);
+      root.add(leftArm);
+      root.add(rightArm);
+
+      // Office Manager Dorsal Sub-Arms (matching Row 2 Col 1-4 in your character sheet)
+      let subArmL = null;
+      let subArmR = null;
+      if (cfg.subArms) {
+        const makeSubArm = (side) => {
+          const sg = new THREE.Group();
+          sg.position.set(side * 0.15, 1.48, -0.11);
+          const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.018, 0.28, 10), chromePiston);
+          seg1.position.set(side * 0.12, 0.06, -0.04);
+          seg1.rotation.z = side * -0.9;
+          sg.add(seg1);
+
+          const claw = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.06), visorMat);
+          claw.position.set(side * 0.24, 0.14, -0.02);
+          sg.add(claw);
+          return sg;
+        };
+        subArmL = makeSubArm(-1);
+        subArmR = makeSubArm(1);
+        root.add(subArmL);
+        root.add(subArmR);
+      }
+
+      // 4. LEGS & BOOTS
+      function buildLeg(side) {
+        const legGroup = new THREE.Group();
+        legGroup.position.set(side * 0.115 * b, 0.88, 0);
+
+        const hip = new THREE.Mesh(new THREE.SphereGeometry(0.065, 14, 12), darkJoint);
+        legGroup.add(hip);
+
+        const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.072 * b, 0.058 * b, 0.4, 16), primaryMetal);
+        thigh.position.set(0, -0.21, 0);
+        legGroup.add(thigh);
+
+        const knee = new THREE.Mesh(new THREE.BoxGeometry(0.085 * b, 0.075, 0.095), darkJoint);
+        knee.position.set(0, -0.42, 0.015);
+        legGroup.add(knee);
+
+        const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.062 * b, 0.048 * b, 0.41, 16), primaryMetal);
+        shin.position.set(0, -0.64, -0.01);
+        legGroup.add(shin);
+
+        const pistonBack = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.36, 10), chromePiston);
+        pistonBack.position.set(0, -0.63, -0.052);
+        legGroup.add(pistonBack);
+
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(0.095 * b, 0.055, 0.21), primaryMetal);
+        foot.position.set(0, -0.86, 0.045);
+        legGroup.add(foot);
+
+        return legGroup;
+      }
+
+      root.add(buildLeg(-1));
+      root.add(buildLeg(1));
+
+      // Ground the feet right at y = 0.02
+      root.position.y = 0.02;
+      root.rotation.y = threeState.rotY;
+
+      threeState.robotGroup = root;
+      threeState.headGroup = headGroup;
+      threeState.leftArm = leftArm;
+      threeState.rightArm = rightArm;
+      threeState.subArmL = subArmL;
+      threeState.subArmR = subArmR;
+      threeState.scene.add(root);
+    }
+
+    function animate3D() {
+      threeState.animId = requestAnimationFrame(animate3D);
+      if (!threeState.renderer || !threeState.scene || !threeState.camera) return;
+
+      const t = performance.now() * 0.0018;
+
+      if (threeState.robotGroup) {
+        // Gentle auto-turntable drift when user is not dragging
+        if (!threeState.isDragging) {
+          threeState.targetRotY += 0.0045;
+        }
+        threeState.rotY += (threeState.targetRotY - threeState.rotY) * 0.12;
+        threeState.robotGroup.rotation.y = threeState.rotY;
+
+        // Subtle hydraulic breathing & head scan
+        threeState.robotGroup.position.y = 0.02 + Math.sin(t * 1.4) * 0.012;
+        if (threeState.headGroup) {
+          threeState.headGroup.rotation.y = Math.sin(t * 0.7) * 0.14;
+        }
+        if (threeState.leftArm && threeState.rightArm) {
+          threeState.leftArm.rotation.x = Math.sin(t) * 0.04;
+          threeState.rightArm.rotation.x = -Math.sin(t) * 0.04;
+        }
+        if (threeState.subArmL && threeState.subArmR) {
+          threeState.subArmL.rotation.z = Math.sin(t * 1.6) * 0.08;
+          threeState.subArmR.rotation.z = -Math.sin(t * 1.6) * 0.08;
+        }
+      }
+
+      threeState.renderer.render(threeState.scene, threeState.camera);
     }
 
     // ============================================================
-    // 4. ROLE SELECTOR UI RENDERING
+    // 4. HEADSHOT SLICER FROM ROLES IMAGE SHEET
+    // ============================================================
+    function loadFirstAvailableImage(urls) {
+      return new Promise((resolve) => {
+        let idx = 0;
+        function tryNext() {
+          if (idx >= urls.length) return resolve(null);
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => {
+            idx++;
+            tryNext();
+          };
+          img.src = urls[idx];
+        }
+        tryNext();
+      });
+    }
+
+    async function sliceHeadshotsFromSheet() {
+      if (spriteLoaded && Object.keys(slicedHeadshots).length === ROLES.length) return;
+
+      const img = await loadFirstAvailableImage(ROLES_SPRITE_CANDIDATES);
+      const warningEl = document.getElementById("sprite-warning");
+
+      if (img) {
+        if (warningEl) warningEl.classList.add("hidden");
+        const w = img.width;
+        const h = img.height;
+        const rowH = Math.floor(h / 2);
+        const colW = w / 8;
+
+        ROLES.forEach((role) => {
+          const sx = role.colStart * colW;
+          const sy = role.row * rowH + rowH * 0.06;
+          const cropSize = Math.min(colW * 0.78, rowH * 0.34);
+          const centerOffsetX = (colW - cropSize) * 0.5;
+
+          const c = document.createElement("canvas");
+          c.width = 200;
+          c.height = 200;
+          const ctx = c.getContext("2d");
+
+          const grad = ctx.createLinearGradient(0, 0, 0, 200);
+          grad.addColorStop(0, "#1c2028");
+          grad.addColorStop(1, "#0a0a0c");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 200, 200);
+
+          const temp = document.createElement("canvas");
+          temp.width = Math.round(cropSize);
+          temp.height = Math.round(cropSize);
+          const tctx = temp.getContext("2d");
+          tctx.drawImage(img, sx + centerOffsetX, sy, cropSize, cropSize, 0, 0, temp.width, temp.height);
+
+          const idata = tctx.getImageData(0, 0, temp.width, temp.height);
+          const d = idata.data;
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i], g = d[i + 1], b = d[i + 2];
+            const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
+            if (maxDiff < 10 && r > 145) {
+              d[i + 3] = 0;
+            }
+          }
+          tctx.putImageData(idata, 0, 0);
+
+          ctx.drawImage(temp, 0, 0, 200, 200);
+          slicedHeadshots[role.id] = c.toDataURL("image/png");
+        });
+
+        spriteLoaded = true;
+      } else {
+        if (warningEl) warningEl.classList.remove("hidden");
+        ROLES.forEach((role) => {
+          const svg = `data:image/svg+xml;utf8,${encodeURIComponent(
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+              <rect width="180" height="180" fill="#14171d"/>
+              <circle cx="90" cy="64" r="28" fill="#4A5568" stroke="#DC1414" stroke-width="2.5"/>
+              <rect x="74" y="56" width="32" height="7" rx="3" fill="#DC1414"/>
+              <path d="M40 164 C40 120, 140 120, 140 164" fill="#292C34" stroke="#4A5568" stroke-width="2.5"/>
+            </svg>`
+          )}`;
+          slicedHeadshots[role.id] = svg;
+        });
+      }
+    }
+
+    // ============================================================
+    // 5. ROLE SELECTOR UI RENDERING
     // ============================================================
     function renderRoleGrid() {
       const grid = document.getElementById("headshot-grid");
       grid.innerHTML = ROLES.map((role, idx) => {
-        const asset = slicedAssets[role.id];
         const isActive = idx === selectedRoleIdx;
         return `
           <div class="headshot-tile ${isActive ? "active" : ""}" onclick="selectRole(${idx})">
-            <img src="${asset?.headshot || ""}" alt="${role.name}" />
+            <img src="${slicedHeadshots[role.id] || ""}" alt="${role.name}" />
             <div class="headshot-label">${role.shortName}</div>
           </div>
         `;
@@ -1089,13 +1645,12 @@
 
     function renderRoleStage() {
       const role = ROLES[selectedRoleIdx];
-      const asset = slicedAssets[role.id];
-      const poses = asset?.poses || [];
-      if (selectedAngleIdx >= poses.length) selectedAngleIdx = 0;
+      document.getElementById("role-cycle-readout").textContent = `ROLE ${selectedRoleIdx + 1} / ${ROLES.length}`;
 
-      document.getElementById("stage-fullbody-img").src = poses[selectedAngleIdx] || "";
-      document.getElementById("angle-readout").textContent = `ANGLE ${selectedAngleIdx + 1} / ${poses.length}`;
+      // Rebuild 3D Terminator Chassis for the selected role
+      build3DRobotMesh(role);
 
+      // Update Right Specs Panel
       document.getElementById("role-code-tag").textContent = role.code;
       document.getElementById("role-main-name").textContent = role.name;
       document.getElementById("role-division").textContent = role.division;
@@ -1119,20 +1674,12 @@
 
     function selectRole(idx) {
       selectedRoleIdx = (idx + ROLES.length) % ROLES.length;
-      selectedAngleIdx = 0;
       renderRoleGrid();
       renderRoleStage();
     }
 
     function cycleRole(delta) {
       selectRole(selectedRoleIdx + delta);
-    }
-
-    function cycleAngle(delta) {
-      const role = ROLES[selectedRoleIdx];
-      const count = slicedAssets[role.id]?.poses?.length || 1;
-      selectedAngleIdx = (selectedAngleIdx + delta + count) % count;
-      renderRoleStage();
     }
 
     async function confirmRoleProfile() {
@@ -1151,10 +1698,8 @@
         role_name: role.name
       };
 
-      // Persist locally for instant load
       localStorage.setItem("skytruss_profile_" + currentUser.id, JSON.stringify(profilePayload));
 
-      // Sync to Supabase user_metadata
       if (sb) {
         const { error } = await sb.auth.updateUser({
           data: {
@@ -1175,7 +1720,7 @@
     }
 
     async function openRoleSelector() {
-      await sliceSpriteSheet();
+      await sliceHeadshotsFromSheet();
       const saved = currentUser
         ? JSON.parse(localStorage.getItem("skytruss_profile_" + currentUser.id) || "null")
         : null;
@@ -1186,18 +1731,19 @@
       document.getElementById("profile-callsign").value =
         saved?.callsign || currentUser?.user_metadata?.display_name || currentUser?.email?.split("@")[0] || "";
 
-      renderRoleGrid();
-      renderRoleStage();
-
       document.getElementById("login-wall").classList.add("hidden");
       document.getElementById("main-scene").classList.add("hidden");
       document.getElementById("role-scene").classList.remove("hidden");
+
+      init3DStage();
+      renderRoleGrid();
+      renderRoleStage();
     }
 
     async function enterMainHub(profile) {
-      await sliceSpriteSheet();
+      await sliceHeadshotsFromSheet();
       const role = ROLES.find((r) => r.id === profile.role_id) || ROLES[0];
-      document.getElementById("hub-avatar").src = slicedAssets[role.id]?.headshot || "";
+      document.getElementById("hub-avatar").src = slicedHeadshots[role.id] || "";
       document.getElementById("hub-role-title").textContent = role.name.toUpperCase();
       document.getElementById("hub-callsign").textContent = profile.callsign.toUpperCase();
 
@@ -1207,7 +1753,7 @@
     }
 
     // ============================================================
-    // 5. AUTHENTICATION FLOW
+    // 6. AUTHENTICATION FLOW
     // ============================================================
     function toggleAuthMode() {
       authMode = authMode === "login" ? "signup" : "login";
@@ -1249,7 +1795,6 @@
       if (!u) return;
       currentUser = u;
 
-      // Check if user already completed Role Selection on first login
       const localProfile = JSON.parse(localStorage.getItem("skytruss_profile_" + u.id) || "null");
       const metaRoleId = u.user_metadata?.role_id;
 
@@ -1264,7 +1809,6 @@
         localStorage.setItem("skytruss_profile_" + u.id, JSON.stringify(synced));
         enterMainHub(synced);
       } else {
-        // First login: send directly to Role Selection profile setup
         openRoleSelector();
       }
     }
@@ -1278,7 +1822,6 @@
       setStatus("");
     }
 
-    // AUTO-RESTORE SESSION ON LAUNCH
     (async () => {
       if (!sb) return;
       const { data } = await sb.auth.getSession();

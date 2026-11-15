@@ -360,16 +360,6 @@
       color: rgba(240, 240, 240, 0.82);
     }
 
-    .sprite-notice {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: #fbbf24;
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.35);
-      padding: 5px 10px;
-      border-radius: 4px;
-    }
-
     .role-stage-grid {
       flex: 1;
       display: grid;
@@ -561,7 +551,6 @@
       white-space: nowrap;
     }
 
-    /* Glowing Floor Pedestal Disc */
     .pedestal-disc {
       position: relative;
       z-index: 2;
@@ -579,7 +568,6 @@
       box-shadow: 0 0 28px rgba(220, 20, 20, 0.35);
     }
 
-    /* Role Cycle Bar under Pedestal */
     .cycle-bar {
       position: relative;
       z-index: 5;
@@ -839,9 +827,6 @@
           Enter your callsign and select your company role to initialize your SKYTRUSS profile.
         </div>
       </div>
-      <div id="sprite-warning" class="sprite-notice hidden">
-        ADD <strong>roles.webp</strong> OR <strong>roles.png</strong> TO <strong>SKYTRUSS/images/</strong> FOR PORTRAITS
-      </div>
     </div>
 
     <div class="role-stage-grid">
@@ -965,12 +950,7 @@
     const SUPABASE_ANON_KEY = "sb_publishable_QU5rvS7F-VfmocfgP1SqKw_gymqv9bQ";
     const sb = SUPABASE_URL.startsWith("http") ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-    const ROLES_SPRITE_CANDIDATES = [
-      "./images/roles.webp",
-      "./images/roles.png",
-      "./images/roles.jpg"
-    ];
-
+    // Each role loads ./images/<id>.png (falling back to .webp or .jpg automatically)
     const ROLES = [
       {
         id: "salesman",
@@ -979,8 +959,6 @@
         shortName: "Salesman",
         name: "The Salesman",
         division: "Client Acquisition & Bid Negotiation",
-        row: 0,
-        colStart: 0,
         chassis: {
           metalColor: 0xb8c2cc,
           metalness: 0.92,
@@ -1006,8 +984,6 @@
         shortName: "Estimator",
         name: "The Estimator",
         division: "Takeoffs, Blueprints & Cost Calculation",
-        row: 0,
-        colStart: 2,
         chassis: {
           metalColor: 0x6c7682,
           metalness: 0.85,
@@ -1033,8 +1009,6 @@
         shortName: "Super",
         name: "The Superintendent",
         division: "On-Site Jobsite Command & Safety",
-        row: 0,
-        colStart: 4,
         chassis: {
           metalColor: 0x7b848f,
           metalness: 0.82,
@@ -1060,8 +1034,6 @@
         shortName: "Office Mgr",
         name: "The Office Manager",
         division: "Multi-Tasking Operations & Dispatch",
-        row: 1,
-        colStart: 0,
         chassis: {
           metalColor: 0x88929e,
           metalness: 0.86,
@@ -1087,8 +1059,6 @@
         shortName: "Admin",
         name: "The Admin",
         division: "Permissions, Compliance & Data Integrity",
-        row: 1,
-        colStart: 6,
         chassis: {
           metalColor: 0x454d59,
           metalness: 0.88,
@@ -1114,8 +1084,6 @@
         shortName: "Project Mgr",
         name: "The Project Manager",
         division: "Schedule Execution, Budget & Delivery",
-        row: 1,
-        colStart: 4,
         chassis: {
           metalColor: 0x9aa3ad,
           metalness: 0.9,
@@ -1139,11 +1107,96 @@
     let currentUser = null;
     let authMode = "login";
     let selectedRoleIdx = 0;
-    let slicedHeadshots = {};
-    let spriteLoaded = false;
+    let roleHeadshots = {}; // { roleId: dataUrl }
 
     // ============================================================
-    // 3. THREE.JS 3D TERMINATOR CHASSIS BUILDER & TURNTABLE
+    // 3. INDIVIDUAL ROLE HEADSHOT LOADER (./images/<role_id>.png)
+    // ============================================================
+    function loadImageElement(src) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    function createFallbackHeadshotSVG() {
+      return `data:image/svg+xml;utf8,${encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+          <rect width="180" height="180" fill="#14171d"/>
+          <circle cx="90" cy="64" r="28" fill="#4A5568" stroke="#DC1414" stroke-width="2.5"/>
+          <rect x="74" y="56" width="32" height="7" rx="3" fill="#DC1414"/>
+          <path d="M40 164 C40 120, 140 120, 140 164" fill="#292C34" stroke="#4A5568" stroke-width="2.5"/>
+        </svg>`
+      )}`;
+    }
+
+    function processIndividualHeadshot(img) {
+      const size = 256;
+      const c = document.createElement("canvas");
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext("2d");
+
+      // Dark studio gradient behind transparent portrait
+      const grad = ctx.createLinearGradient(0, 0, 0, size);
+      grad.addColorStop(0, "#1e232c");
+      grad.addColorStop(1, "#0a0a0c");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+
+      // Draw onto temp canvas to strip any baked-in light gray checkerboard pixels
+      const temp = document.createElement("canvas");
+      temp.width = size;
+      temp.height = size;
+      const tctx = temp.getContext("2d");
+
+      // Center-crop square from top-center of portrait
+      const srcMin = Math.min(img.width, img.height);
+      const sx = (img.width - srcMin) * 0.5;
+      const sy = 0;
+      tctx.drawImage(img, sx, sy, srcMin, srcMin, 0, 0, size, size);
+
+      const idata = tctx.getImageData(0, 0, size, size);
+      const d = idata.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2];
+        const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
+        if (maxDiff < 10 && r > 155) {
+          d[i + 3] = 0;
+        }
+      }
+      tctx.putImageData(idata, 0, 0);
+
+      ctx.drawImage(temp, 0, 0, size, size);
+      return c.toDataURL("image/png");
+    }
+
+    async function loadAllRoleHeadshots() {
+      await Promise.all(
+        ROLES.map(async (role) => {
+          const candidates = [
+            `./images/${role.id}.png`,
+            `./images/${role.id}.webp`,
+            `./images/${role.id}.jpg`
+          ];
+
+          let loadedImg = null;
+          for (const url of candidates) {
+            loadedImg = await loadImageElement(url);
+            if (loadedImg) break;
+          }
+
+          roleHeadshots[role.id] = loadedImg
+            ? processIndividualHeadshot(loadedImg)
+            : createFallbackHeadshotSVG();
+        })
+      );
+    }
+
+    // ============================================================
+    // 4. THREE.JS 3D TERMINATOR CHASSIS BUILDER & TURNTABLE
     // ============================================================
     let threeState = {
       initialized: false,
@@ -1156,7 +1209,6 @@
       rightArm: null,
       subArmL: null,
       subArmR: null,
-      coreLight: null,
       rotY: 0.25,
       targetRotY: 0.25,
       isDragging: false,
@@ -1183,7 +1235,6 @@
       renderer.toneMappingExposure = 1.25;
       container.appendChild(renderer.domElement);
 
-      // Studio Three-Point + Cyberdyne Rim Lighting
       const ambient = new THREE.AmbientLight(0xdbeafe, 0.75);
       scene.add(ambient);
 
@@ -1208,7 +1259,6 @@
       threeState.renderer = renderer;
       threeState.initialized = true;
 
-      // Pointer Drag Rotation (Mouse + Touch)
       const onDown = (clientX) => {
         threeState.isDragging = true;
         threeState.lastX = clientX;
@@ -1257,7 +1307,6 @@
       const cfg = role.chassis;
       const root = new THREE.Group();
 
-      // Materials
       const primaryMetal = new THREE.MeshStandardMaterial({
         color: cfg.metalColor,
         metalness: cfg.metalness,
@@ -1282,7 +1331,7 @@
 
       const b = cfg.bulk;
 
-      // 1. HEAD & SKULL ASSEMBLY
+      // HEAD & SKULL
       const headGroup = new THREE.Group();
       headGroup.position.set(0, 1.84, 0);
 
@@ -1298,12 +1347,10 @@
       chinPlate.position.set(0, -0.105, 0.035);
       headGroup.add(chinPlate);
 
-      // Glowing Optical Visor / Eyes
       const visor = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.032, 0.05), visorMat);
       visor.position.set(0, 0.005, 0.118);
       headGroup.add(visor);
 
-      // Superintendent Hard-Hat Helmet Option
       if (cfg.helmet) {
         const dome = new THREE.Mesh(
           new THREE.SphereGeometry(0.158, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
@@ -1319,7 +1366,7 @@
 
       root.add(headGroup);
 
-      // Neck & Hydraulic Pistons
+      // NECK & PISTONS
       const neckCore = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.068, 0.14, 16), darkJoint);
       neckCore.position.set(0, 1.68, -0.01);
       root.add(neckCore);
@@ -1331,7 +1378,7 @@
         root.add(piston);
       });
 
-      // 2. TORSO, CHEST ARMOR & RIBCAGE
+      // TORSO & CHEST CORE
       const chest = new THREE.Mesh(
         new THREE.CylinderGeometry(0.23 * b, 0.17 * b, 0.34, 18),
         primaryMetal
@@ -1340,7 +1387,6 @@
       chest.position.set(0, 1.45, 0);
       root.add(chest);
 
-      // Pectoral Armor Plates
       [-0.095 * b, 0.095 * b].forEach((px) => {
         const pec = new THREE.Mesh(
           new THREE.BoxGeometry(0.16 * b, 0.15, 0.07),
@@ -1351,7 +1397,6 @@
         root.add(pec);
       });
 
-      // Glowing Cyberdyne Chest Core Node
       const coreBezel = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 20), darkJoint);
       coreBezel.rotation.x = Math.PI / 2;
       coreBezel.position.set(0, 1.44, 0.135);
@@ -1362,7 +1407,6 @@
       coreGlow.position.set(0, 1.44, 0.138);
       root.add(coreGlow);
 
-      // Segmented Spine & Abdomen
       const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.32, 16), darkJoint);
       spine.position.set(0, 1.16, -0.02);
       root.add(spine);
@@ -1378,7 +1422,6 @@
         root.add(rib);
       }
 
-      // Pelvis / Tactical Belt
       const pelvis = new THREE.Mesh(
         new THREE.CylinderGeometry(0.165 * b, 0.13 * b, 0.16, 16),
         cfg.heavyArmor ? primaryMetal : darkJoint
@@ -1387,36 +1430,31 @@
       pelvis.position.set(0, 0.96, 0);
       root.add(pelvis);
 
-      // 3. ARMS & HANDS (LEFT & RIGHT)
+      // ARMS
       function buildArm(side) {
         const armGroup = new THREE.Group();
         armGroup.position.set(side * 0.28 * b, 1.54, 0);
 
-        // Shoulder Pauldron
         const shoulder = new THREE.Mesh(
           new THREE.SphereGeometry(cfg.heavyArmor ? 0.115 : 0.088, 18, 16),
           primaryMetal
         );
         armGroup.add(shoulder);
 
-        // Upper Arm
         const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.052 * b, 0.044 * b, 0.31, 14), primaryMetal);
         upperArm.position.set(side * 0.02, -0.18, 0);
         upperArm.rotation.z = side * -0.08;
         armGroup.add(upperArm);
 
-        // Elbow Joint
         const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.048, 14, 12), darkJoint);
         elbow.position.set(side * 0.035, -0.34, 0);
         armGroup.add(elbow);
 
-        // Forearm
         const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.048 * b, 0.038 * b, 0.3, 14), primaryMetal);
         forearm.position.set(side * 0.04, -0.5, 0.03);
         forearm.rotation.x = -0.16;
         armGroup.add(forearm);
 
-        // Estimator / Office Manager Forearm Holo-Datapad
         if (cfg.datapads) {
           const pad = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.11, 0.02), visorMat);
           pad.position.set(side * 0.068, -0.49, 0.04);
@@ -1424,7 +1462,6 @@
           armGroup.add(pad);
         }
 
-        // Mechanical Hand
         const hand = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.085, 0.035), darkJoint);
         hand.position.set(side * 0.042, -0.68, 0.06);
         armGroup.add(hand);
@@ -1437,7 +1474,6 @@
       root.add(leftArm);
       root.add(rightArm);
 
-      // Office Manager Dorsal Sub-Arms (matching Row 2 Col 1-4 in your character sheet)
       let subArmL = null;
       let subArmR = null;
       if (cfg.subArms) {
@@ -1460,7 +1496,7 @@
         root.add(subArmR);
       }
 
-      // 4. LEGS & BOOTS
+      // LEGS
       function buildLeg(side) {
         const legGroup = new THREE.Group();
         legGroup.position.set(side * 0.115 * b, 0.88, 0);
@@ -1494,7 +1530,6 @@
       root.add(buildLeg(-1));
       root.add(buildLeg(1));
 
-      // Ground the feet right at y = 0.02
       root.position.y = 0.02;
       root.rotation.y = threeState.rotY;
 
@@ -1514,14 +1549,12 @@
       const t = performance.now() * 0.0018;
 
       if (threeState.robotGroup) {
-        // Gentle auto-turntable drift when user is not dragging
         if (!threeState.isDragging) {
           threeState.targetRotY += 0.0045;
         }
         threeState.rotY += (threeState.targetRotY - threeState.rotY) * 0.12;
         threeState.robotGroup.rotation.y = threeState.rotY;
 
-        // Subtle hydraulic breathing & head scan
         threeState.robotGroup.position.y = 0.02 + Math.sin(t * 1.4) * 0.012;
         if (threeState.headGroup) {
           threeState.headGroup.rotation.y = Math.sin(t * 0.7) * 0.14;
@@ -1540,94 +1573,6 @@
     }
 
     // ============================================================
-    // 4. HEADSHOT SLICER FROM ROLES IMAGE SHEET
-    // ============================================================
-    function loadFirstAvailableImage(urls) {
-      return new Promise((resolve) => {
-        let idx = 0;
-        function tryNext() {
-          if (idx >= urls.length) return resolve(null);
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = () => {
-            idx++;
-            tryNext();
-          };
-          img.src = urls[idx];
-        }
-        tryNext();
-      });
-    }
-
-    async function sliceHeadshotsFromSheet() {
-      if (spriteLoaded && Object.keys(slicedHeadshots).length === ROLES.length) return;
-
-      const img = await loadFirstAvailableImage(ROLES_SPRITE_CANDIDATES);
-      const warningEl = document.getElementById("sprite-warning");
-
-      if (img) {
-        if (warningEl) warningEl.classList.add("hidden");
-        const w = img.width;
-        const h = img.height;
-        const rowH = Math.floor(h / 2);
-        const colW = w / 8;
-
-        ROLES.forEach((role) => {
-          const sx = role.colStart * colW;
-          const sy = role.row * rowH + rowH * 0.06;
-          const cropSize = Math.min(colW * 0.78, rowH * 0.34);
-          const centerOffsetX = (colW - cropSize) * 0.5;
-
-          const c = document.createElement("canvas");
-          c.width = 200;
-          c.height = 200;
-          const ctx = c.getContext("2d");
-
-          const grad = ctx.createLinearGradient(0, 0, 0, 200);
-          grad.addColorStop(0, "#1c2028");
-          grad.addColorStop(1, "#0a0a0c");
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, 200, 200);
-
-          const temp = document.createElement("canvas");
-          temp.width = Math.round(cropSize);
-          temp.height = Math.round(cropSize);
-          const tctx = temp.getContext("2d");
-          tctx.drawImage(img, sx + centerOffsetX, sy, cropSize, cropSize, 0, 0, temp.width, temp.height);
-
-          const idata = tctx.getImageData(0, 0, temp.width, temp.height);
-          const d = idata.data;
-          for (let i = 0; i < d.length; i += 4) {
-            const r = d[i], g = d[i + 1], b = d[i + 2];
-            const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
-            if (maxDiff < 10 && r > 145) {
-              d[i + 3] = 0;
-            }
-          }
-          tctx.putImageData(idata, 0, 0);
-
-          ctx.drawImage(temp, 0, 0, 200, 200);
-          slicedHeadshots[role.id] = c.toDataURL("image/png");
-        });
-
-        spriteLoaded = true;
-      } else {
-        if (warningEl) warningEl.classList.remove("hidden");
-        ROLES.forEach((role) => {
-          const svg = `data:image/svg+xml;utf8,${encodeURIComponent(
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
-              <rect width="180" height="180" fill="#14171d"/>
-              <circle cx="90" cy="64" r="28" fill="#4A5568" stroke="#DC1414" stroke-width="2.5"/>
-              <rect x="74" y="56" width="32" height="7" rx="3" fill="#DC1414"/>
-              <path d="M40 164 C40 120, 140 120, 140 164" fill="#292C34" stroke="#4A5568" stroke-width="2.5"/>
-            </svg>`
-          )}`;
-          slicedHeadshots[role.id] = svg;
-        });
-      }
-    }
-
-    // ============================================================
     // 5. ROLE SELECTOR UI RENDERING
     // ============================================================
     function renderRoleGrid() {
@@ -1636,7 +1581,7 @@
         const isActive = idx === selectedRoleIdx;
         return `
           <div class="headshot-tile ${isActive ? "active" : ""}" onclick="selectRole(${idx})">
-            <img src="${slicedHeadshots[role.id] || ""}" alt="${role.name}" />
+            <img src="${roleHeadshots[role.id] || ""}" alt="${role.name}" />
             <div class="headshot-label">${role.shortName}</div>
           </div>
         `;
@@ -1647,10 +1592,8 @@
       const role = ROLES[selectedRoleIdx];
       document.getElementById("role-cycle-readout").textContent = `ROLE ${selectedRoleIdx + 1} / ${ROLES.length}`;
 
-      // Rebuild 3D Terminator Chassis for the selected role
       build3DRobotMesh(role);
 
-      // Update Right Specs Panel
       document.getElementById("role-code-tag").textContent = role.code;
       document.getElementById("role-main-name").textContent = role.name;
       document.getElementById("role-division").textContent = role.division;
@@ -1720,7 +1663,7 @@
     }
 
     async function openRoleSelector() {
-      await sliceHeadshotsFromSheet();
+      await loadAllRoleHeadshots();
       const saved = currentUser
         ? JSON.parse(localStorage.getItem("skytruss_profile_" + currentUser.id) || "null")
         : null;
@@ -1741,9 +1684,9 @@
     }
 
     async function enterMainHub(profile) {
-      await sliceHeadshotsFromSheet();
+      await loadAllRoleHeadshots();
       const role = ROLES.find((r) => r.id === profile.role_id) || ROLES[0];
-      document.getElementById("hub-avatar").src = slicedHeadshots[role.id] || "";
+      document.getElementById("hub-avatar").src = roleHeadshots[role.id] || "";
       document.getElementById("hub-role-title").textContent = role.name.toUpperCase();
       document.getElementById("hub-callsign").textContent = profile.callsign.toUpperCase();
 

@@ -383,7 +383,6 @@
       }
     }
 
-    /* LEFT COLUMN: CALLSIGN + HEADSHOT GRID */
     .roster-panel {
       display: flex;
       flex-direction: column;
@@ -486,7 +485,6 @@
       color: var(--cyberdyne-red);
     }
 
-    /* CENTER COLUMN: INTERACTIVE THREE.JS 3D ROBOT STAGE */
     .showcase-stage {
       position: relative;
       display: flex;
@@ -603,7 +601,6 @@
       text-align: center;
     }
 
-    /* RIGHT COLUMN: ROLE TITLE, STATS BARS, & CONFIRM CTA */
     .specs-panel {
       display: flex;
       flex-direction: column;
@@ -715,7 +712,7 @@
     }
 
     /* ============================================================
-       SCENE 2: MAIN POST-ONBOARDING COMMAND HUB
+       SCENE 2: MAIN COMMAND HUB WITH ROTATING RED-LINED GLOBE
        ============================================================ */
     #main-scene {
       width: 100%;
@@ -724,58 +721,350 @@
       flex-direction: column;
       background-color: var(--hazard-black);
       background-image:
+        radial-gradient(circle at 50% 52%, rgba(220, 20, 20, 0.16) 0%, transparent 60%),
         linear-gradient(rgba(74, 85, 104, 0.12) 1px, transparent 1px),
         linear-gradient(90deg, rgba(74, 85, 104, 0.12) 1px, transparent 1px);
-      background-size: 28px 28px;
+      background-size: 100% 100%, 28px 28px, 28px 28px;
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
     }
 
-    .main-body {
+    .hub-operator-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 18px;
+      background: rgba(18, 20, 26, 0.85);
+      border-bottom: 1px solid rgba(74, 85, 104, 0.5);
+      flex-shrink: 0;
+    }
+
+    .hub-operator-id {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-badge-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 5px;
+      border: 1.5px solid var(--cyberdyne-red);
+      object-fit: cover;
+      object-position: top center;
+      background: #12141a;
+    }
+
+    .hub-telemetry-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: var(--hud-white);
+      background: rgba(220, 20, 20, 0.16);
+      border: 1px solid rgba(220, 20, 20, 0.55);
+      padding: 5px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .globe-command-stage {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      text-align: center;
-      overflow-y: auto;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .hud-panel {
+    .globe-interactive-wrap {
       position: relative;
-      max-width: 420px;
+      width: min(370px, 84vw);
+      height: min(370px, 54vh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .globe-interactive-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      border: 1px dashed rgba(220, 20, 20, 0.4);
+      pointer-events: none;
+      animation: spinSlow 28s linear infinite;
+    }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    #globe-viewport {
       width: 100%;
-      padding: 24px 20px;
-      background: rgba(41, 44, 52, 0.45);
+      height: 100%;
+    }
+
+    #globe-viewport canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .globe-target-badge {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      background: rgba(10, 10, 12, 0.88);
+      border: 1px solid var(--cyberdyne-red);
+      box-shadow: 0 0 18px var(--cyberdyne-glow);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-family: var(--font-header);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      color: var(--hud-white);
+      white-space: nowrap;
+    }
+
+    .globe-cta-card {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 12px;
+      padding: 14px 16px;
+      background: rgba(18, 20, 26, 0.82);
       border: 1px solid var(--galvanized-steel);
+      border-radius: 4px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 12px;
+      gap: 10px;
+      position: relative;
     }
 
-    .hud-panel::before {
+    .globe-cta-card::before {
       content: "";
       position: absolute;
       top: -1px;
       left: -1px;
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       border-top: 2px solid var(--cyberdyne-red);
       border-left: 2px solid var(--cyberdyne-red);
     }
 
-    .profile-badge-avatar {
-      width: 84px;
-      height: 84px;
-      border-radius: 6px;
-      border: 2px solid var(--cyberdyne-red);
-      object-fit: cover;
-      object-position: top center;
-      background: #12141a;
+    /* ============================================================
+       SCENE 3: CURRENT PROJECT MAP (TERRITORY JOBS VIEW)
+       ============================================================ */
+    #map-scene {
+      width: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--hazard-black);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    .map-header-strip {
+      padding: 10px 18px;
+      background: linear-gradient(90deg, rgba(220, 20, 20, 0.2) 0%, rgba(18, 20, 26, 0.95) 60%);
+      border-bottom: 1px solid rgba(220, 20, 20, 0.5);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .territory-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .territory-pill {
+      min-height: 30px;
+      padding: 4px 10px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: rgba(41, 44, 52, 0.85);
+      color: rgba(240, 240, 240, 0.78);
+      border: 1px solid var(--galvanized-steel);
+    }
+
+    .territory-pill.active {
+      background: var(--cyberdyne-red);
+      color: var(--hud-white);
+      border-color: var(--hud-white);
+      box-shadow: 0 0 12px var(--cyberdyne-glow);
+    }
+
+    .map-workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto;
+      overflow: hidden;
+    }
+
+    @media (min-width: 860px) {
+      .map-workspace {
+        grid-template-columns: 1fr 340px;
+        grid-template-rows: 1fr;
+      }
+    }
+
+    .radar-map-canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 290px;
+      background-color: #08090c;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(220, 20, 20, 0.14) 0%, transparent 65%),
+        linear-gradient(rgba(220, 20, 20, 0.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(220, 20, 20, 0.14) 1px, transparent 1px),
+        linear-gradient(rgba(74, 85, 104, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 85, 104, 0.12) 1px, transparent 1px);
+      background-size: 100% 100%, 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+      overflow: hidden;
+    }
+
+    .radar-svg-roads {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .map-job-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      z-index: 6;
+    }
+
+    .pin-beacon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyberdyne-red);
+      border: 2px solid var(--hud-white);
+      box-shadow: 0 0 16px var(--cyberdyne-red);
+      position: relative;
+      transition: transform 0.15s ease;
+    }
+
+    .map-job-pin.selected .pin-beacon {
+      transform: scale(1.3);
+      background: #ffffff;
+      border-color: var(--cyberdyne-red);
+      box-shadow: 0 0 24px #ff2a2a;
+    }
+
+    .pin-beacon::after {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      border-radius: 50%;
+      border: 1.5px solid var(--cyberdyne-red);
+      animation: pulseRing 2s ease-out infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.7); opacity: 0.95; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+
+    .pin-tag {
+      background: rgba(10, 10, 12, 0.92);
+      border: 1px solid rgba(220, 20, 20, 0.65);
+      padding: 3px 7px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: var(--hud-white);
+      white-space: nowrap;
+    }
+
+    .map-job-pin.selected .pin-tag {
+      border-color: var(--hud-white);
+      background: var(--cyberdyne-red);
+    }
+
+    .job-drawer {
+      background: rgba(14, 16, 21, 0.96);
+      border-top: 1px solid var(--galvanized-steel);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 44vh;
+    }
+
+    @media (min-width: 860px) {
+      .job-drawer {
+        border-top: none;
+        border-left: 1px solid var(--galvanized-steel);
+        max-height: none;
+      }
+    }
+
+    .job-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .job-item {
+      padding: 10px 12px;
+      background: rgba(41, 44, 52, 0.45);
+      border: 1px solid rgba(74, 85, 104, 0.6);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .job-item.selected {
+      background: rgba(220, 20, 20, 0.16);
+      border-color: var(--cyberdyne-red);
+    }
+
+    .job-status-chip {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      background: rgba(220, 20, 20, 0.25);
+      color: #fca5a5;
+      border: 1px solid rgba(220, 20, 20, 0.55);
     }
   </style>
 </head>
@@ -830,7 +1119,6 @@
     </div>
 
     <div class="role-stage-grid">
-      <!-- LEFT: STEP 1 CALLSIGN + STEP 2 HEADSHOT GRID -->
       <div class="roster-panel">
         <div class="field">
           <label for="profile-callsign">1. OPERATOR CALLSIGN / FULL NAME</label>
@@ -845,7 +1133,6 @@
         <div class="headshot-grid" id="headshot-grid"></div>
       </div>
 
-      <!-- CENTER: INTERACTIVE 3D TERMINATOR CHASSIS STAGE -->
       <div class="showcase-stage">
         <div class="holo-beam"></div>
 
@@ -862,7 +1149,6 @@
         </div>
       </div>
 
-      <!-- RIGHT: STEP 3 ROLE SPECS & CONFIRMATION -->
       <div class="specs-panel">
         <div class="role-title-block">
           <div class="role-code-tag" id="role-code-tag">UNIT 01 // FRONT-LINE OPS</div>
@@ -882,7 +1168,7 @@
     </div>
   </div>
 
-  <!-- SCENE 2: MAIN POST-ONBOARDING COMMAND HUB -->
+  <!-- SCENE 2: MAIN COMMAND HUB WITH ROTATING RED-LINED GLOBE -->
   <div id="main-scene" class="hidden">
     <div class="scene-topbar">
       <div class="hud-brand">
@@ -895,16 +1181,95 @@
       </div>
     </div>
 
-    <div class="main-body">
-      <div class="hud-panel">
+    <div class="hub-operator-strip">
+      <div class="hub-operator-id">
         <img id="hub-avatar" class="profile-badge-avatar" src="" alt="Role Avatar" />
-        <div style="font-family:var(--font-header); font-size:16px; letter-spacing:1.8px; color:var(--cyberdyne-red);" id="hub-role-title">
-          THE SALESMAN
+        <div>
+          <div style="font-family:var(--font-header); font-size:13px; font-weight:900; letter-spacing:1.4px; color:var(--hud-white);" id="hub-callsign">
+            OPERATOR
+          </div>
+          <div style="font-size:11px; color:var(--cyberdyne-red); font-weight:700; letter-spacing:1px;" id="hub-role-title">
+            THE SALESMAN
+          </div>
         </div>
-        <div style="font-size:13px; font-weight:700; letter-spacing:1px;" id="hub-callsign">OPERATOR</div>
-        <p style="color:var(--hud-white); opacity:0.78; font-size:12px; line-height:1.6; margin:0;">
-          PROFILE ACTIVE & SYNCED TO SUPABASE. READY FOR SKYTRUSS OPERATIONS.
+      </div>
+      <div class="hub-telemetry-pill">TERRITORY // SECTOR FL-01</div>
+    </div>
+
+    <div class="globe-command-stage">
+      <div class="globe-interactive-wrap" id="globe-trigger" title="Select Globe to Open Current Project Map">
+        <div id="globe-viewport"></div>
+        <div class="globe-target-badge">TAP GLOBE // LAUNCH PROJECT MAP</div>
+      </div>
+
+      <div class="globe-cta-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-header); font-size:12px; letter-spacing:1.5px; color:var(--hud-white);">
+            GLOBAL DISPATCH RADAR
+          </span>
+          <span style="font-size:10px; color:#4ade80; font-weight:700;">● 5 ACTIVE JOBS</span>
+        </div>
+        <p style="margin:0; font-size:11px; line-height:1.5; color:rgba(240,240,240,0.75);">
+          Drag to inspect orbital sector or select the red-lined globe to enter your territory's <strong>Current Project Map</strong>.
         </p>
+        <button type="button" class="btn-signin" onclick="openProjectMap()">
+          OPEN CURRENT PROJECT MAP
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 3: CURRENT PROJECT MAP (TERRITORY JOBS VIEW) -->
+  <div id="map-scene" class="hidden">
+    <div class="scene-topbar">
+      <div class="hud-brand">
+        <img src="./images/skytruss.webp" alt="SKYTRUSS" />
+        <span>SKYTRUSS</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="btn-ghost" onclick="returnToGlobeHub()">◀ Globe View</button>
+        <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="map-header-strip">
+      <div>
+        <div style="font-family:var(--font-header); font-size:16px; font-weight:900; letter-spacing:2px; color:var(--hud-white);">
+          CURRENT PROJECT MAP
+        </div>
+        <div style="font-size:11px; color:rgba(240,240,240,0.75);" id="territory-subtitle">
+          TERRITORY: NORTH FLORIDA // BIG BEND & PANHANDLE
+        </div>
+      </div>
+
+      <div class="territory-pills" id="territory-pills">
+        <button type="button" class="territory-pill active" onclick="setTerritory('FL_NORTH', this)">NORTH FL</button>
+        <button type="button" class="territory-pill" onclick="setTerritory('GA_SOUTH', this)">SOUTH GA</button>
+        <button type="button" class="territory-pill" onclick="setTerritory('AL_GULF', this)">GULF COAST</button>
+      </div>
+    </div>
+
+    <div class="map-workspace">
+      <!-- TACTICAL TERRITORY RADAR MAP WITH PINS -->
+      <div class="radar-map-canvas" id="radar-map-canvas">
+        <svg class="radar-svg-roads" viewBox="0 0 800 500" preserveAspectRatio="none">
+          <!-- Territory Vector Highways & Sector Grid Lines -->
+          <path d="M 40 220 Q 260 190 430 245 T 760 210" fill="none" stroke="rgba(220,20,20,0.42)" stroke-width="2.5" stroke-dasharray="8 6" />
+          <path d="M 380 30 Q 410 240 365 470" fill="none" stroke="rgba(220,20,20,0.35)" stroke-width="2" />
+          <path d="M 140 80 L 660 410" fill="none" stroke="rgba(74,85,104,0.35)" stroke-width="1.5" stroke-dasharray="4 6" />
+          <circle cx="400" cy="250" r="140" fill="none" stroke="rgba(220,20,20,0.22)" stroke-width="1.5" />
+          <circle cx="400" cy="250" r="245" fill="none" stroke="rgba(220,20,20,0.14)" stroke-width="1" />
+        </svg>
+        <div id="map-pins-layer"></div>
+      </div>
+
+      <!-- JOB MANIFEST DRAWER -->
+      <div class="job-drawer">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(74,85,104,0.45); padding-bottom:8px;">
+          <span style="font-family:var(--font-header); font-size:12px; letter-spacing:1.4px;">ACTIVE TERRITORY JOBS</span>
+          <span style="font-size:10px; color:var(--cyberdyne-red); font-weight:700;" id="job-count-label">5 SITES</span>
+        </div>
+        <div class="job-card-list" id="job-card-list"></div>
       </div>
     </div>
   </div>
@@ -944,13 +1309,12 @@
     })();
 
     // ============================================================
-    // 2. SUPABASE CONFIG & ROLE DEFINITIONS
+    // 2. SUPABASE CONFIG, ROLES & TERRITORY PROJECT DATA
     // ============================================================
     const SUPABASE_URL = "https://fwpnbbkyhugzppclsgbl.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QU5rvS7F-VfmocfgP1SqKw_gymqv9bQ";
     const sb = SUPABASE_URL.startsWith("http") ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-    // Each role loads ./images/<id>.png (falling back to .webp or .jpg automatically)
     const ROLES = [
       {
         id: "salesman",
@@ -959,17 +1323,7 @@
         shortName: "Salesman",
         name: "The Salesman",
         division: "Client Acquisition & Bid Negotiation",
-        chassis: {
-          metalColor: 0xb8c2cc,
-          metalness: 0.92,
-          roughness: 0.2,
-          visorColor: 0xdc1414,
-          bulk: 1.0,
-          helmet: false,
-          datapads: false,
-          subArms: false,
-          heavyArmor: false
-        },
+        chassis: { metalColor: 0xb8c2cc, metalness: 0.92, roughness: 0.2, visorColor: 0xdc1414, bulk: 1.0, helmet: false, datapads: false, subArms: false, heavyArmor: false },
         stats: [
           { label: "NEGOTIATION", value: 94 },
           { label: "SPEED", value: 88 },
@@ -984,17 +1338,7 @@
         shortName: "Estimator",
         name: "The Estimator",
         division: "Takeoffs, Blueprints & Cost Calculation",
-        chassis: {
-          metalColor: 0x6c7682,
-          metalness: 0.85,
-          roughness: 0.34,
-          visorColor: 0xff2a2a,
-          bulk: 0.92,
-          helmet: false,
-          datapads: true,
-          subArms: false,
-          heavyArmor: false
-        },
+        chassis: { metalColor: 0x6c7682, metalness: 0.85, roughness: 0.34, visorColor: 0xff2a2a, bulk: 0.92, helmet: false, datapads: true, subArms: false, heavyArmor: false },
         stats: [
           { label: "PRECISION", value: 98 },
           { label: "ANALYTICS", value: 95 },
@@ -1009,17 +1353,7 @@
         shortName: "Super",
         name: "The Superintendent",
         division: "On-Site Jobsite Command & Safety",
-        chassis: {
-          metalColor: 0x7b848f,
-          metalness: 0.82,
-          roughness: 0.32,
-          visorColor: 0xf59e0b,
-          bulk: 1.24,
-          helmet: true,
-          datapads: false,
-          subArms: false,
-          heavyArmor: true
-        },
+        chassis: { metalColor: 0x7b848f, metalness: 0.82, roughness: 0.32, visorColor: 0xf59e0b, bulk: 1.24, helmet: true, datapads: false, subArms: false, heavyArmor: true },
         stats: [
           { label: "ARMOR", value: 96 },
           { label: "COMMAND", value: 92 },
@@ -1034,17 +1368,7 @@
         shortName: "Office Mgr",
         name: "The Office Manager",
         division: "Multi-Tasking Operations & Dispatch",
-        chassis: {
-          metalColor: 0x88929e,
-          metalness: 0.86,
-          roughness: 0.28,
-          visorColor: 0x38bdf8,
-          bulk: 0.94,
-          helmet: false,
-          datapads: true,
-          subArms: true,
-          heavyArmor: false
-        },
+        chassis: { metalColor: 0x88929e, metalness: 0.86, roughness: 0.28, visorColor: 0x38bdf8, bulk: 0.94, helmet: false, datapads: true, subArms: true, heavyArmor: false },
         stats: [
           { label: "MULTI-TASK", value: 97 },
           { label: "SPEED", value: 91 },
@@ -1059,17 +1383,7 @@
         shortName: "Admin",
         name: "The Admin",
         division: "Permissions, Compliance & Data Integrity",
-        chassis: {
-          metalColor: 0x454d59,
-          metalness: 0.88,
-          roughness: 0.26,
-          visorColor: 0xdc1414,
-          bulk: 1.04,
-          helmet: false,
-          datapads: true,
-          subArms: false,
-          heavyArmor: true
-        },
+        chassis: { metalColor: 0x454d59, metalness: 0.88, roughness: 0.26, visorColor: 0xdc1414, bulk: 1.04, helmet: false, datapads: true, subArms: false, heavyArmor: true },
         stats: [
           { label: "SECURITY", value: 96 },
           { label: "PRECISION", value: 93 },
@@ -1084,17 +1398,7 @@
         shortName: "Project Mgr",
         name: "The Project Manager",
         division: "Schedule Execution, Budget & Delivery",
-        chassis: {
-          metalColor: 0x9aa3ad,
-          metalness: 0.9,
-          roughness: 0.24,
-          visorColor: 0xdc1414,
-          bulk: 1.12,
-          helmet: false,
-          datapads: false,
-          subArms: false,
-          heavyArmor: true
-        },
+        chassis: { metalColor: 0x9aa3ad, metalness: 0.9, roughness: 0.24, visorColor: 0xdc1414, bulk: 1.12, helmet: false, datapads: false, subArms: false, heavyArmor: true },
         stats: [
           { label: "COMMAND", value: 95 },
           { label: "ANALYTICS", value: 91 },
@@ -1104,13 +1408,43 @@
       }
     ];
 
+    const TERRITORY_JOBS = {
+      FL_NORTH: {
+        label: "NORTH FLORIDA // BIG BEND & PANHANDLE",
+        jobs: [
+          { id: "JOB-104", name: "MIDWAY LOGISTICS HUB", city: "Midway, FL", x: 34, y: 44, status: "FABRICATING", trusses: "148 Clear-Span Steel Trusses", span: "84 ft", due: "NOV 19" },
+          { id: "JOB-109", name: "APALACHEE TECH ANNEX", city: "Tallahassee, FL", x: 52, y: 48, status: "READY TO SHIP", trusses: "92 Roof & Floor Trusses", span: "62 ft", due: "NOV 17" },
+          { id: "JOB-112", name: "QUINCY COLD STORAGE", city: "Quincy, FL", x: 24, y: 34, status: "ENGINEERING", trusses: "210 Heavy-Load Trusses", span: "96 ft", due: "NOV 24" },
+          { id: "JOB-118", name: "WAKULLA MARINE HANGAR", city: "Crawfordville, FL", x: 48, y: 74, status: "CRANE ON-SITE", trusses: "64 Coastal Wind-Rated", span: "78 ft", due: "ACTIVE" },
+          { id: "JOB-121", name: "MONTICELLO AGRI-BARN", city: "Monticello, FL", x: 74, y: 38, status: "BID APPROVED", trusses: "116 Gambrel Roof Trusses", span: "54 ft", due: "NOV 28" }
+        ]
+      },
+      GA_SOUTH: {
+        label: "SOUTH GEORGIA // VALDOSTA & THOMASVILLE",
+        jobs: [
+          { id: "JOB-201", name: "THOMASVILLE MEDICAL WING", city: "Thomasville, GA", x: 36, y: 52, status: "FABRICATING", trusses: "134 Commercial Roof Trusses", span: "68 ft", due: "NOV 21" },
+          { id: "JOB-205", name: "VALDOSTA FREIGHT DEPOT", city: "Valdosta, GA", x: 72, y: 46, status: "READY TO SHIP", trusses: "180 Long-Span Trusses", span: "90 ft", due: "NOV 18" },
+          { id: "JOB-208", name: "BAINBRIDGE RIVER MILL", city: "Bainbridge, GA", x: 18, y: 64, status: "ENGINEERING", trusses: "88 Industrial Trusses", span: "72 ft", due: "NOV 26" }
+        ]
+      },
+      AL_GULF: {
+        label: "GULF COAST // DOTHAN & PANAMA CITY",
+        jobs: [
+          { id: "JOB-302", name: "PANAMA CITY HANGAR B", city: "Panama City, FL", x: 42, y: 68, status: "CRANE ON-SITE", trusses: "110 Hurricane-Spec Trusses", span: "88 ft", due: "ACTIVE" },
+          { id: "JOB-307", name: "DOTHAN ASSEMBLY PLANT", city: "Dothan, AL", x: 56, y: 28, status: "FABRICATING", trusses: "240 Heavy Truss Units", span: "102 ft", due: "NOV 23" }
+        ]
+      }
+    };
+
     let currentUser = null;
     let authMode = "login";
     let selectedRoleIdx = 0;
-    let roleHeadshots = {}; // { roleId: dataUrl }
+    let roleHeadshots = {};
+    let activeTerritoryKey = "FL_NORTH";
+    let selectedJobId = "JOB-104";
 
     // ============================================================
-    // 3. INDIVIDUAL ROLE HEADSHOT LOADER (./images/<role_id>.png)
+    // 3. INDIVIDUAL ROLE HEADSHOT LOADER
     // ============================================================
     function loadImageElement(src) {
       return new Promise((resolve) => {
@@ -1139,24 +1473,20 @@
       c.height = size;
       const ctx = c.getContext("2d");
 
-      // Dark studio gradient behind transparent portrait
       const grad = ctx.createLinearGradient(0, 0, 0, size);
       grad.addColorStop(0, "#1e232c");
       grad.addColorStop(1, "#0a0a0c");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, size, size);
 
-      // Draw onto temp canvas to strip any baked-in light gray checkerboard pixels
       const temp = document.createElement("canvas");
       temp.width = size;
       temp.height = size;
       const tctx = temp.getContext("2d");
 
-      // Center-crop square from top-center of portrait
       const srcMin = Math.min(img.width, img.height);
       const sx = (img.width - srcMin) * 0.5;
-      const sy = 0;
-      tctx.drawImage(img, sx, sy, srcMin, srcMin, 0, 0, size, size);
+      tctx.drawImage(img, sx, 0, srcMin, srcMin, 0, 0, size, size);
 
       const idata = tctx.getImageData(0, 0, size, size);
       const d = idata.data;
@@ -1181,13 +1511,11 @@
             `./images/${role.id}.webp`,
             `./images/${role.id}.jpg`
           ];
-
           let loadedImg = null;
           for (const url of candidates) {
             loadedImg = await loadImageElement(url);
             if (loadedImg) break;
           }
-
           roleHeadshots[role.id] = loadedImg
             ? processIndividualHeadshot(loadedImg)
             : createFallbackHeadshotSVG();
@@ -1196,7 +1524,7 @@
     }
 
     // ============================================================
-    // 4. THREE.JS 3D TERMINATOR CHASSIS BUILDER & TURNTABLE
+    // 4. THREE.JS 3D TERMINATOR CHASSIS (ROLE SELECTOR)
     // ============================================================
     let threeState = {
       initialized: false,
@@ -1212,8 +1540,7 @@
       rotY: 0.25,
       targetRotY: 0.25,
       isDragging: false,
-      lastX: 0,
-      animId: null
+      lastX: 0
     };
 
     function init3DStage() {
@@ -1235,9 +1562,7 @@
       renderer.toneMappingExposure = 1.25;
       container.appendChild(renderer.domElement);
 
-      const ambient = new THREE.AmbientLight(0xdbeafe, 0.75);
-      scene.add(ambient);
-
+      scene.add(new THREE.AmbientLight(0xdbeafe, 0.75));
       const keyLight = new THREE.DirectionalLight(0xffffff, 1.85);
       keyLight.position.set(2.8, 4.5, 3.6);
       scene.add(keyLight);
@@ -1259,40 +1584,20 @@
       threeState.renderer = renderer;
       threeState.initialized = true;
 
-      const onDown = (clientX) => {
-        threeState.isDragging = true;
-        threeState.lastX = clientX;
-      };
-      const onMove = (clientX) => {
+      const onDown = (x) => { threeState.isDragging = true; threeState.lastX = x; };
+      const onMove = (x) => {
         if (!threeState.isDragging) return;
-        const dx = clientX - threeState.lastX;
-        threeState.lastX = clientX;
-        threeState.targetRotY += dx * 0.014;
+        threeState.targetRotY += (x - threeState.lastX) * 0.014;
+        threeState.lastX = x;
       };
-      const onUp = () => {
-        threeState.isDragging = false;
-      };
+      const onUp = () => { threeState.isDragging = false; };
 
       container.addEventListener("mousedown", (e) => onDown(e.clientX));
       window.addEventListener("mousemove", (e) => onMove(e.clientX));
       window.addEventListener("mouseup", onUp);
-
-      container.addEventListener("touchstart", (e) => {
-        if (e.touches[0]) onDown(e.touches[0].clientX);
-      }, { passive: true });
-      container.addEventListener("touchmove", (e) => {
-        if (e.touches[0]) onMove(e.touches[0].clientX);
-      }, { passive: true });
+      container.addEventListener("touchstart", (e) => { if (e.touches[0]) onDown(e.touches[0].clientX); }, { passive: true });
+      container.addEventListener("touchmove", (e) => { if (e.touches[0]) onMove(e.touches[0].clientX); }, { passive: true });
       container.addEventListener("touchend", onUp);
-
-      window.addEventListener("resize", () => {
-        if (!threeState.renderer || !container.clientWidth) return;
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        threeState.camera.aspect = w / h;
-        threeState.camera.updateProjectionMatrix();
-        threeState.renderer.setSize(w, h);
-      });
 
       build3DRobotMesh(ROLES[selectedRoleIdx]);
       animate3D();
@@ -1300,41 +1605,18 @@
 
     function build3DRobotMesh(role) {
       if (!threeState.scene) return;
-      if (threeState.robotGroup) {
-        threeState.scene.remove(threeState.robotGroup);
-      }
+      if (threeState.robotGroup) threeState.scene.remove(threeState.robotGroup);
 
       const cfg = role.chassis;
       const root = new THREE.Group();
-
-      const primaryMetal = new THREE.MeshStandardMaterial({
-        color: cfg.metalColor,
-        metalness: cfg.metalness,
-        roughness: cfg.roughness
-      });
-      const darkJoint = new THREE.MeshStandardMaterial({
-        color: 0x1a1e24,
-        metalness: 0.78,
-        roughness: 0.42
-      });
-      const chromePiston = new THREE.MeshStandardMaterial({
-        color: 0xe2e8f0,
-        metalness: 0.96,
-        roughness: 0.14
-      });
-      const visorMat = new THREE.MeshStandardMaterial({
-        color: cfg.visorColor,
-        emissive: cfg.visorColor,
-        emissiveIntensity: 2.2,
-        roughness: 0.2
-      });
-
+      const primaryMetal = new THREE.MeshStandardMaterial({ color: cfg.metalColor, metalness: cfg.metalness, roughness: cfg.roughness });
+      const darkJoint = new THREE.MeshStandardMaterial({ color: 0x1a1e24, metalness: 0.78, roughness: 0.42 });
+      const chromePiston = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.96, roughness: 0.14 });
+      const visorMat = new THREE.MeshStandardMaterial({ color: cfg.visorColor, emissive: cfg.visorColor, emissiveIntensity: 2.2, roughness: 0.2 });
       const b = cfg.bulk;
 
-      // HEAD & SKULL
       const headGroup = new THREE.Group();
       headGroup.position.set(0, 1.84, 0);
-
       const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.135, 24, 20), primaryMetal);
       cranium.scale.set(0.92, 1.12, 1.02);
       headGroup.add(cranium);
@@ -1343,64 +1625,25 @@
       jaw.position.set(0, -0.075, 0.025);
       headGroup.add(jaw);
 
-      const chinPlate = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.05, 0.14), primaryMetal);
-      chinPlate.position.set(0, -0.105, 0.035);
-      headGroup.add(chinPlate);
-
       const visor = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.032, 0.05), visorMat);
       visor.position.set(0, 0.005, 0.118);
       headGroup.add(visor);
 
       if (cfg.helmet) {
-        const dome = new THREE.Mesh(
-          new THREE.SphereGeometry(0.158, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
-          primaryMetal
-        );
+        const dome = new THREE.Mesh(new THREE.SphereGeometry(0.158, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), primaryMetal);
         dome.position.set(0, 0.025, 0);
         headGroup.add(dome);
-
-        const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.165, 0.175, 0.018, 24), darkJoint);
-        brim.position.set(0, 0.035, 0.02);
-        headGroup.add(brim);
       }
-
       root.add(headGroup);
 
-      // NECK & PISTONS
       const neckCore = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.068, 0.14, 16), darkJoint);
       neckCore.position.set(0, 1.68, -0.01);
       root.add(neckCore);
 
-      [-0.045, 0.045].forEach((nx) => {
-        const piston = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.14, 12), chromePiston);
-        piston.position.set(nx, 1.68, 0.02);
-        piston.rotation.z = nx * 1.4;
-        root.add(piston);
-      });
-
-      // TORSO & CHEST CORE
-      const chest = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.23 * b, 0.17 * b, 0.34, 18),
-        primaryMetal
-      );
+      const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.23 * b, 0.17 * b, 0.34, 18), primaryMetal);
       chest.scale.set(1.0, 1.0, 0.68);
       chest.position.set(0, 1.45, 0);
       root.add(chest);
-
-      [-0.095 * b, 0.095 * b].forEach((px) => {
-        const pec = new THREE.Mesh(
-          new THREE.BoxGeometry(0.16 * b, 0.15, 0.07),
-          cfg.heavyArmor ? primaryMetal : darkJoint
-        );
-        pec.position.set(px, 1.49, 0.115);
-        pec.rotation.y = px > 0 ? -0.18 : 0.18;
-        root.add(pec);
-      });
-
-      const coreBezel = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 20), darkJoint);
-      coreBezel.rotation.x = Math.PI / 2;
-      coreBezel.position.set(0, 1.44, 0.135);
-      root.add(coreBezel);
 
       const coreGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.045, 20), visorMat);
       coreGlow.rotation.x = Math.PI / 2;
@@ -1411,61 +1654,26 @@
       spine.position.set(0, 1.16, -0.02);
       root.add(spine);
 
-      for (let r = 0; r < 3; r++) {
-        const rib = new THREE.Mesh(
-          new THREE.TorusGeometry(0.135 * b - r * 0.01, 0.016, 10, 24),
-          chromePiston
-        );
-        rib.rotation.x = Math.PI / 2;
-        rib.scale.set(1.0, 0.72, 1.0);
-        rib.position.set(0, 1.24 - r * 0.065, 0.01);
-        root.add(rib);
-      }
-
-      const pelvis = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.165 * b, 0.13 * b, 0.16, 16),
-        cfg.heavyArmor ? primaryMetal : darkJoint
-      );
+      const pelvis = new THREE.Mesh(new THREE.CylinderGeometry(0.165 * b, 0.13 * b, 0.16, 16), cfg.heavyArmor ? primaryMetal : darkJoint);
       pelvis.scale.set(1.0, 1.0, 0.75);
       pelvis.position.set(0, 0.96, 0);
       root.add(pelvis);
 
-      // ARMS
       function buildArm(side) {
         const armGroup = new THREE.Group();
         armGroup.position.set(side * 0.28 * b, 1.54, 0);
-
-        const shoulder = new THREE.Mesh(
-          new THREE.SphereGeometry(cfg.heavyArmor ? 0.115 : 0.088, 18, 16),
-          primaryMetal
-        );
-        armGroup.add(shoulder);
-
+        armGroup.add(new THREE.Mesh(new THREE.SphereGeometry(cfg.heavyArmor ? 0.115 : 0.088, 18, 16), primaryMetal));
         const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.052 * b, 0.044 * b, 0.31, 14), primaryMetal);
         upperArm.position.set(side * 0.02, -0.18, 0);
-        upperArm.rotation.z = side * -0.08;
         armGroup.add(upperArm);
-
-        const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.048, 14, 12), darkJoint);
-        elbow.position.set(side * 0.035, -0.34, 0);
-        armGroup.add(elbow);
-
         const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.048 * b, 0.038 * b, 0.3, 14), primaryMetal);
         forearm.position.set(side * 0.04, -0.5, 0.03);
-        forearm.rotation.x = -0.16;
         armGroup.add(forearm);
-
         if (cfg.datapads) {
           const pad = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.11, 0.02), visorMat);
           pad.position.set(side * 0.068, -0.49, 0.04);
-          pad.rotation.x = -0.16;
           armGroup.add(pad);
         }
-
-        const hand = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.085, 0.035), darkJoint);
-        hand.position.set(side * 0.042, -0.68, 0.06);
-        armGroup.add(hand);
-
         return armGroup;
       }
 
@@ -1474,56 +1682,18 @@
       root.add(leftArm);
       root.add(rightArm);
 
-      let subArmL = null;
-      let subArmR = null;
-      if (cfg.subArms) {
-        const makeSubArm = (side) => {
-          const sg = new THREE.Group();
-          sg.position.set(side * 0.15, 1.48, -0.11);
-          const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.018, 0.28, 10), chromePiston);
-          seg1.position.set(side * 0.12, 0.06, -0.04);
-          seg1.rotation.z = side * -0.9;
-          sg.add(seg1);
-
-          const claw = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.06), visorMat);
-          claw.position.set(side * 0.24, 0.14, -0.02);
-          sg.add(claw);
-          return sg;
-        };
-        subArmL = makeSubArm(-1);
-        subArmR = makeSubArm(1);
-        root.add(subArmL);
-        root.add(subArmR);
-      }
-
-      // LEGS
       function buildLeg(side) {
         const legGroup = new THREE.Group();
         legGroup.position.set(side * 0.115 * b, 0.88, 0);
-
-        const hip = new THREE.Mesh(new THREE.SphereGeometry(0.065, 14, 12), darkJoint);
-        legGroup.add(hip);
-
         const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.072 * b, 0.058 * b, 0.4, 16), primaryMetal);
         thigh.position.set(0, -0.21, 0);
         legGroup.add(thigh);
-
-        const knee = new THREE.Mesh(new THREE.BoxGeometry(0.085 * b, 0.075, 0.095), darkJoint);
-        knee.position.set(0, -0.42, 0.015);
-        legGroup.add(knee);
-
         const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.062 * b, 0.048 * b, 0.41, 16), primaryMetal);
         shin.position.set(0, -0.64, -0.01);
         legGroup.add(shin);
-
-        const pistonBack = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.36, 10), chromePiston);
-        pistonBack.position.set(0, -0.63, -0.052);
-        legGroup.add(pistonBack);
-
         const foot = new THREE.Mesh(new THREE.BoxGeometry(0.095 * b, 0.055, 0.21), primaryMetal);
         foot.position.set(0, -0.86, 0.045);
         legGroup.add(foot);
-
         return legGroup;
       }
 
@@ -1531,49 +1701,276 @@
       root.add(buildLeg(1));
 
       root.position.y = 0.02;
-      root.rotation.y = threeState.rotY;
-
       threeState.robotGroup = root;
       threeState.headGroup = headGroup;
       threeState.leftArm = leftArm;
       threeState.rightArm = rightArm;
-      threeState.subArmL = subArmL;
-      threeState.subArmR = subArmR;
       threeState.scene.add(root);
     }
 
     function animate3D() {
-      threeState.animId = requestAnimationFrame(animate3D);
+      requestAnimationFrame(animate3D);
       if (!threeState.renderer || !threeState.scene || !threeState.camera) return;
-
       const t = performance.now() * 0.0018;
-
       if (threeState.robotGroup) {
-        if (!threeState.isDragging) {
-          threeState.targetRotY += 0.0045;
-        }
+        if (!threeState.isDragging) threeState.targetRotY += 0.0045;
         threeState.rotY += (threeState.targetRotY - threeState.rotY) * 0.12;
         threeState.robotGroup.rotation.y = threeState.rotY;
-
         threeState.robotGroup.position.y = 0.02 + Math.sin(t * 1.4) * 0.012;
-        if (threeState.headGroup) {
-          threeState.headGroup.rotation.y = Math.sin(t * 0.7) * 0.14;
-        }
-        if (threeState.leftArm && threeState.rightArm) {
-          threeState.leftArm.rotation.x = Math.sin(t) * 0.04;
-          threeState.rightArm.rotation.x = -Math.sin(t) * 0.04;
-        }
-        if (threeState.subArmL && threeState.subArmR) {
-          threeState.subArmL.rotation.z = Math.sin(t * 1.6) * 0.08;
-          threeState.subArmR.rotation.z = -Math.sin(t * 1.6) * 0.08;
-        }
       }
-
       threeState.renderer.render(threeState.scene, threeState.camera);
     }
 
     // ============================================================
-    // 5. ROLE SELECTOR UI RENDERING
+    // 5. THREE.JS ROTATING RED-LINED GLOBE (COMMAND HUB)
+    // ============================================================
+    let globeState = {
+      initialized: false,
+      scene: null,
+      camera: null,
+      renderer: null,
+      globeGroup: null,
+      ringOuter: null,
+      rotY: 0,
+      targetRotY: 0,
+      isDragging: false,
+      dragDistance: 0,
+      lastX: 0
+    };
+
+    function initGlobeStage() {
+      const container = document.getElementById("globe-viewport");
+      if (!container || globeState.initialized || !window.THREE) return;
+
+      const w = container.clientWidth || 340;
+      const h = container.clientHeight || 340;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(36, w / h, 0.1, 100);
+      camera.position.set(0, 0.35, 3.6);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      container.appendChild(renderer.domElement);
+
+      const globeGroup = new THREE.Group();
+      globeGroup.rotation.z = 0.22; // Tactical axial tilt
+
+      // 1. Dark Obsidian Core Sphere (occludes back lines cleanly)
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0x0b0c10,
+        transparent: true,
+        opacity: 0.92
+      });
+      globeGroup.add(new THREE.Mesh(new THREE.SphereGeometry(1.02, 32, 24), coreMat));
+
+      // 2. Primary Cyberdyne Red Wireframe Latitude/Longitude Mesh
+      const wireGeo = new THREE.WireframeGeometry(new THREE.SphereGeometry(1.035, 22, 16));
+      const wireMat = new THREE.LineBasicMaterial({
+        color: 0xdc1414,
+        transparent: true,
+        opacity: 0.78
+      });
+      globeGroup.add(new THREE.LineSegments(wireGeo, wireMat));
+
+      // 3. Outer Faint Crimson Atmosphere Halo Grid
+      const outerWireGeo = new THREE.WireframeGeometry(new THREE.SphereGeometry(1.08, 12, 10));
+      const outerWireMat = new THREE.LineBasicMaterial({
+        color: 0xff3b3b,
+        transparent: true,
+        opacity: 0.18
+      });
+      globeGroup.add(new THREE.LineSegments(outerWireGeo, outerWireMat));
+
+      // 4. Equatorial & Orbital Scanner Rings
+      const equatorMat = new THREE.MeshBasicMaterial({ color: 0xff2a2a, side: THREE.DoubleSide });
+      const equatorRing = new THREE.Mesh(new THREE.RingGeometry(1.18, 1.205, 64), equatorMat);
+      equatorRing.rotation.x = Math.PI / 2;
+      globeGroup.add(equatorRing);
+
+      const ringOuter = new THREE.Mesh(
+        new THREE.RingGeometry(1.31, 1.325, 64),
+        new THREE.MeshBasicMaterial({ color: 0xdc1414, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
+      );
+      ringOuter.rotation.x = Math.PI / 2.3;
+      ringOuter.rotation.y = 0.3;
+      scene.add(ringOuter);
+
+      // 5. Glowing Job Territory Nodes across the Globe Surface
+      const nodeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const beaconHaloMat = new THREE.MeshBasicMaterial({ color: 0xdc1414 });
+      const coords = [
+        [28, -84], [32, -83], [31, -85], [35, -97], [41, -87],
+        [48, 2], [35, 139], [-33, 151], [19, -99], [51, -0.1]
+      ];
+      coords.forEach(([lat, lon]) => {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        const r = 1.045;
+        const x = -(r * Math.sin(phi) * Math.cos(theta));
+        const z = r * Math.sin(phi) * Math.sin(theta);
+        const y = r * Math.cos(phi);
+
+        const dot = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 10), nodeMat);
+        dot.position.set(x, y, z);
+        globeGroup.add(dot);
+
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 10), beaconHaloMat);
+        halo.position.set(x, y, z);
+        globeGroup.add(halo);
+      });
+
+      scene.add(globeGroup);
+
+      globeState.scene = scene;
+      globeState.camera = camera;
+      globeState.renderer = renderer;
+      globeState.globeGroup = globeGroup;
+      globeState.ringOuter = ringOuter;
+      globeState.initialized = true;
+
+      // Drag vs Tap detection on the Globe
+      const triggerEl = document.getElementById("globe-trigger");
+      const onDown = (x) => {
+        globeState.isDragging = true;
+        globeState.dragDistance = 0;
+        globeState.lastX = x;
+      };
+      const onMove = (x) => {
+        if (!globeState.isDragging) return;
+        const dx = x - globeState.lastX;
+        globeState.dragDistance += Math.abs(dx);
+        globeState.lastX = x;
+        globeState.targetRotY += dx * 0.012;
+      };
+      const onUp = () => {
+        if (globeState.isDragging && globeState.dragDistance < 8) {
+          openProjectMap();
+        }
+        globeState.isDragging = false;
+      };
+
+      triggerEl.addEventListener("mousedown", (e) => onDown(e.clientX));
+      window.addEventListener("mousemove", (e) => onMove(e.clientX));
+      window.addEventListener("mouseup", onUp);
+
+      triggerEl.addEventListener("touchstart", (e) => {
+        if (e.touches[0]) onDown(e.touches[0].clientX);
+      }, { passive: true });
+      triggerEl.addEventListener("touchmove", (e) => {
+        if (e.touches[0]) onMove(e.touches[0].clientX);
+      }, { passive: true });
+      triggerEl.addEventListener("touchend", onUp);
+
+      window.addEventListener("resize", () => {
+        if (!globeState.renderer || !container.clientWidth) return;
+        const nw = container.clientWidth;
+        const nh = container.clientHeight;
+        globeState.camera.aspect = nw / nh;
+        globeState.camera.updateProjectionMatrix();
+        globeState.renderer.setSize(nw, nh);
+      });
+
+      animateGlobe();
+    }
+
+    function animateGlobe() {
+      requestAnimationFrame(animateGlobe);
+      if (!globeState.renderer || !globeState.scene || !globeState.camera) return;
+
+      if (!globeState.isDragging) {
+        globeState.targetRotY += 0.0055;
+      }
+      globeState.rotY += (globeState.targetRotY - globeState.rotY) * 0.1;
+
+      if (globeState.globeGroup) {
+        globeState.globeGroup.rotation.y = globeState.rotY;
+      }
+      if (globeState.ringOuter) {
+        globeState.ringOuter.rotation.z += 0.004;
+      }
+
+      globeState.renderer.render(globeState.scene, globeState.camera);
+    }
+
+    // ============================================================
+    // 6. CURRENT PROJECT MAP (TERRITORY JOBS VIEW)
+    // ============================================================
+    function openProjectMap() {
+      document.getElementById("login-wall").classList.add("hidden");
+      document.getElementById("role-scene").classList.add("hidden");
+      document.getElementById("main-scene").classList.add("hidden");
+      document.getElementById("map-scene").classList.remove("hidden");
+      renderTerritoryMap();
+    }
+
+    function returnToGlobeHub() {
+      document.getElementById("map-scene").classList.add("hidden");
+      document.getElementById("main-scene").classList.remove("hidden");
+    }
+
+    function setTerritory(key, btnEl) {
+      activeTerritoryKey = key;
+      const list = TERRITORY_JOBS[key]?.jobs || [];
+      selectedJobId = list[0]?.id || "";
+
+      document.querySelectorAll(".territory-pill").forEach((b) => b.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
+
+      renderTerritoryMap();
+    }
+
+    function selectTerritoryJob(jobId) {
+      selectedJobId = jobId;
+      renderTerritoryMap();
+    }
+
+    function renderTerritoryMap() {
+      const sector = TERRITORY_JOBS[activeTerritoryKey] || TERRITORY_JOBS.FL_NORTH;
+      document.getElementById("territory-subtitle").textContent = `TERRITORY: ${sector.label}`;
+      document.getElementById("job-count-label").textContent = `${sector.jobs.length} SITES`;
+
+      const pinsLayer = document.getElementById("map-pins-layer");
+      pinsLayer.innerHTML = sector.jobs
+        .map((job) => {
+          const isSel = job.id === selectedJobId;
+          return `
+            <div class="map-job-pin ${isSel ? "selected" : ""}" style="left:${job.x}%; top:${job.y}%;" onclick="selectTerritoryJob('${job.id}')">
+              <div class="pin-beacon"></div>
+              <div class="pin-tag">${job.id} • ${job.city.split(",")[0].toUpperCase()}</div>
+            </div>
+          `;
+        })
+        .join("");
+
+      const listEl = document.getElementById("job-card-list");
+      listEl.innerHTML = sector.jobs
+        .map((job) => {
+          const isSel = job.id === selectedJobId;
+          return `
+            <div class="job-item ${isSel ? "selected" : ""}" onclick="selectTerritoryJob('${job.id}')">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
+                <span style="font-family:var(--font-header); font-size:11px; font-weight:800; color:var(--hud-white);">
+                  ${job.name}
+                </span>
+                <span class="job-status-chip">${job.status}</span>
+              </div>
+              <div style="font-size:10px; color:rgba(240,240,240,0.75); margin-bottom:4px;">
+                📍 ${job.city} • DUE: <strong>${job.due}</strong>
+              </div>
+              <div style="font-size:10px; color:#94a3b8;">
+                ${job.trusses} (MAX SPAN: ${job.span})
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    // ============================================================
+    // 7. ROLE SELECTOR & NAVIGATION FLOW
     // ============================================================
     function renderRoleGrid() {
       const grid = document.getElementById("headshot-grid");
@@ -1591,7 +1988,6 @@
     function renderRoleStage() {
       const role = ROLES[selectedRoleIdx];
       document.getElementById("role-cycle-readout").textContent = `ROLE ${selectedRoleIdx + 1} / ${ROLES.length}`;
-
       build3DRobotMesh(role);
 
       document.getElementById("role-code-tag").textContent = role.code;
@@ -1676,6 +2072,7 @@
 
       document.getElementById("login-wall").classList.add("hidden");
       document.getElementById("main-scene").classList.add("hidden");
+      document.getElementById("map-scene").classList.add("hidden");
       document.getElementById("role-scene").classList.remove("hidden");
 
       init3DStage();
@@ -1692,11 +2089,14 @@
 
       document.getElementById("login-wall").classList.add("hidden");
       document.getElementById("role-scene").classList.add("hidden");
+      document.getElementById("map-scene").classList.add("hidden");
       document.getElementById("main-scene").classList.remove("hidden");
+
+      initGlobeStage();
     }
 
     // ============================================================
-    // 6. AUTHENTICATION FLOW
+    // 8. AUTHENTICATION FLOW
     // ============================================================
     function toggleAuthMode() {
       authMode = authMode === "login" ? "signup" : "login";
@@ -1761,6 +2161,7 @@
       currentUser = null;
       document.getElementById("main-scene").classList.add("hidden");
       document.getElementById("role-scene").classList.add("hidden");
+      document.getElementById("map-scene").classList.add("hidden");
       document.getElementById("login-wall").classList.remove("hidden");
       setStatus("");
     }

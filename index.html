@@ -71,7 +71,9 @@
       display: none !important;
     }
 
-    /* FULL-BLEED ARTWORK WITH BORDERLESS FLOATING INPUTS UNDER LEFT LOGO */
+    /* ============================================================
+       PORTRAIT IPHONE DEFAULT: FULL SCENE VISIBLE AT TOP (NO ZOOM)
+       ============================================================ */
     #login-wall {
       position: relative;
       width: 100%;
@@ -81,51 +83,88 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
-      /* Portrait iPhone: frames the left SKYTRUSS logo in the upper half */
-      background: url("./images/login.webp") 14% 14% / cover no-repeat;
+      justify-content: space-between;
+      background-color: var(--hazard-black);
       padding:
-        calc(20px + env(safe-area-inset-top))
-        calc(22px + env(safe-area-inset-right))
-        calc(32px + env(safe-area-inset-bottom))
-        calc(22px + env(safe-area-inset-left));
+        env(safe-area-inset-top)
+        0
+        calc(26px + env(safe-area-inset-bottom))
+        0;
     }
 
-    /* Soft dark vignette in the lower-left corner behind the floating inputs */
-    #login-wall::before {
+    /* Hero banner showing the ENTIRE landscape image (Logo + Terminator) uncropped on portrait iPhone */
+    .hero-artwork {
+      position: relative;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .hero-artwork img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    /* Seamless fade from bottom edge of artwork into Hazard Black */
+    .hero-artwork::after {
       content: "";
-      position: fixed;
-      inset: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 45%;
       pointer-events: none;
-      background: radial-gradient(
-        circle at 20% 88%,
-        rgba(10, 10, 12, 0.82) 0%,
-        rgba(10, 10, 12, 0.38) 45%,
-        transparent 75%
-      );
-      z-index: 1;
+      background: linear-gradient(180deg, transparent 0%, var(--hazard-black) 100%);
     }
 
-    /* Landscape / iPad / Desktop: aligns directly beneath the left SKYTRUSS wordmark */
-    @media (min-width: 680px) {
-      #login-wall {
-        align-items: flex-start;
-        justify-content: flex-end;
-        background-position: center center;
-        padding-left: clamp(28px, 5vw, 72px);
-        padding-bottom: clamp(28px, 6vh, 60px);
-      }
-    }
-
-    /* Completely borderless, transparent layout stack */
     .login-stack {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 320px;
+      max-width: 340px;
+      padding: 0 22px;
+      margin-top: -18px;
       display: flex;
       flex-direction: column;
       gap: 11px;
+    }
+
+    /* ============================================================
+       LANDSCAPE / IPAD / DESKTOP: FULL-BLEED ART + LOWER-LEFT HUD
+       ============================================================ */
+    @media (min-width: 680px) {
+      #login-wall {
+        align-items: flex-start;
+        justify-content: flex-end;
+        background: url("./images/login.webp") center center / cover no-repeat;
+        padding-left: clamp(28px, 5vw, 72px);
+        padding-bottom: clamp(28px, 6vh, 60px);
+      }
+
+      #login-wall::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          circle at 20% 88%,
+          rgba(10, 10, 12, 0.84) 0%,
+          rgba(10, 10, 12, 0.38) 45%,
+          transparent 75%
+        );
+        z-index: 1;
+      }
+
+      .hero-artwork {
+        display: none;
+      }
+
+      .login-stack {
+        max-width: 320px;
+        padding: 0;
+        margin-top: 0;
+      }
     }
 
     .field {
@@ -151,7 +190,7 @@
       min-height: 45px;
       padding: 10px 13px;
       border-radius: 5px;
-      background: rgba(10, 10, 12, 0.42);
+      background: rgba(18, 20, 26, 0.72);
       backdrop-filter: blur(18px) saturate(140%);
       -webkit-backdrop-filter: blur(18px) saturate(140%);
       border: 1px solid rgba(74, 85, 104, 0.65);
@@ -166,7 +205,7 @@
     }
 
     .field input:focus {
-      background: rgba(10, 10, 12, 0.72);
+      background: rgba(10, 10, 12, 0.88);
       border-color: var(--cyberdyne-red);
       box-shadow: 0 0 16px var(--cyberdyne-glow);
     }
@@ -311,6 +350,11 @@
 <body>
   <!-- LOGIN WALL -->
   <div id="login-wall">
+    <!-- Full uncropped artwork banner for portrait phones -->
+    <div class="hero-artwork">
+      <img src="./images/login.webp" alt="SKYTRUSS" />
+    </div>
+
     <div class="login-stack">
       <div class="field">
         <label for="auth-email">EMAIL</label>

@@ -20,7 +20,7 @@
   <style>
     :root {
       --cyberdyne-red: #DC1414;
-      --cyberdyne-glow: rgba(220, 20, 20, 0.45);
+      --cyberdyne-glow: rgba(220, 20, 20, 0.48);
       --galvanized-steel: #4A5568;
       --matte-iron: #292C34;
       --hud-white: #F0F0F0;
@@ -51,7 +51,7 @@
       user-select: text;
       -webkit-user-select: text;
       font-family: var(--font-mono);
-      font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
+      font-size: 16px !important;
     }
 
     button {
@@ -60,7 +60,7 @@
       border: none;
       font-weight: 800;
       min-height: 44px;
-      transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.2s ease;
+      transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
     button:active {
@@ -72,7 +72,7 @@
     }
 
     /* ============================================================
-       PORTRAIT IPHONE DEFAULT: FULL SCENE VISIBLE AT TOP (NO ZOOM)
+       SCENE 0: LOGIN WALL
        ============================================================ */
     #login-wall {
       position: relative;
@@ -92,7 +92,6 @@
         0;
     }
 
-    /* Hero banner showing the ENTIRE landscape image (Logo + Terminator) uncropped on portrait iPhone */
     .hero-artwork {
       position: relative;
       width: 100%;
@@ -106,7 +105,6 @@
       object-fit: contain;
     }
 
-    /* Seamless fade from bottom edge of artwork into Hazard Black */
     .hero-artwork::after {
       content: "";
       position: absolute;
@@ -130,9 +128,6 @@
       gap: 11px;
     }
 
-    /* ============================================================
-       LANDSCAPE / IPAD / DESKTOP: FULL-BLEED ART + LOWER-LEFT HUD
-       ============================================================ */
     @media (min-width: 680px) {
       #login-wall {
         align-items: flex-start;
@@ -223,10 +218,6 @@
       box-shadow: 0 0 22px var(--cyberdyne-glow);
     }
 
-    .btn-signin:hover {
-      filter: brightness(1.08);
-    }
-
     .mode-toggle {
       background: none;
       border: none;
@@ -255,23 +246,9 @@
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.98);
     }
 
-    /* POST-LOGIN SHELL (TACTICAL HUD) */
-    #main-scene {
-      width: 100%;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      background-color: var(--hazard-black);
-      background-image:
-        linear-gradient(rgba(74, 85, 104, 0.12) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74, 85, 104, 0.12) 1px, transparent 1px);
-      background-size: 28px 28px;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-    }
-
+    /* ============================================================
+       SHARED TOP HUD BAR
+       ============================================================ */
     .scene-topbar {
       height: 54px;
       padding: 0 16px;
@@ -282,6 +259,7 @@
       justify-content: space-between;
       gap: 8px;
       flex-shrink: 0;
+      z-index: 20;
     }
 
     .hud-brand {
@@ -289,7 +267,7 @@
       align-items: center;
       gap: 10px;
       font-family: var(--font-header);
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       letter-spacing: 2px;
       color: var(--hud-white);
@@ -315,6 +293,378 @@
       min-height: 36px;
     }
 
+    /* ============================================================
+       SCENE 1: ROLE SELECTION SCREEN (ESPORTS CHARACTER SELECT)
+       ============================================================ */
+    #role-scene {
+      width: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--hazard-black);
+      background-image:
+        radial-gradient(circle at 50% 42%, rgba(220, 20, 20, 0.14) 0%, transparent 55%),
+        linear-gradient(rgba(74, 85, 104, 0.11) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 85, 104, 0.11) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    .role-stage-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      padding: 12px 16px 14px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    /* Desktop / iPad Landscape 3-Column Layout matching Reference 1 */
+    @media (min-width: 820px) {
+      .role-stage-grid {
+        grid-template-columns: 310px 1fr 310px;
+        grid-template-rows: 1fr;
+        align-items: center;
+        padding: 18px 28px;
+        gap: 20px;
+        overflow: hidden;
+      }
+    }
+
+    /* LEFT COLUMN: HEADSHOT GRID + CALLSIGN INPUT */
+    .roster-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 5;
+    }
+
+    .section-kicker {
+      font-family: var(--font-header);
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--hud-white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-kicker span {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--cyberdyne-red);
+      letter-spacing: 1.4px;
+    }
+
+    .headshot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .headshot-tile {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(180deg, rgba(41, 44, 52, 0.72) 0%, rgba(10, 10, 12, 0.92) 100%);
+      border: 1px solid rgba(74, 85, 104, 0.65);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      transition: transform 0.14s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .headshot-tile:hover {
+      border-color: rgba(240, 240, 240, 0.65);
+    }
+
+    .headshot-tile.active {
+      border: 2px solid var(--hud-white);
+      box-shadow: 0 0 18px var(--cyberdyne-glow), inset 0 0 14px rgba(220, 20, 20, 0.28);
+      transform: scale(1.03);
+    }
+
+    .headshot-tile.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--cyberdyne-red);
+      z-index: 3;
+    }
+
+    .headshot-tile img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .headshot-label {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 3px 4px;
+      background: rgba(10, 10, 12, 0.86);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-top: 1px solid rgba(74, 85, 104, 0.4);
+    }
+
+    .headshot-tile.active .headshot-label {
+      color: var(--cyberdyne-red);
+    }
+
+    /* CENTER COLUMN: FULL-BODY CHARACTER PEDESTAL */
+    .showcase-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 290px;
+      height: 100%;
+    }
+
+    /* Vertical hologram light beam behind character (matches Reference 1) */
+    .holo-beam {
+      position: absolute;
+      top: 4%;
+      bottom: 12%;
+      width: min(240px, 56vw);
+      background: linear-gradient(
+        180deg,
+        rgba(74, 85, 104, 0.04) 0%,
+        rgba(74, 85, 104, 0.2) 55%,
+        rgba(220, 20, 20, 0.18) 100%
+      );
+      border-left: 1px solid rgba(255, 255, 255, 0.07);
+      border-right: 1px solid rgba(255, 255, 255, 0.07);
+      pointer-events: none;
+    }
+
+    .character-figure-wrap {
+      position: relative;
+      z-index: 3;
+      height: clamp(230px, 44vh, 430px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .character-figure-wrap img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.85));
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* Glowing Floor Pedestal Disc */
+    .pedestal-disc {
+      position: relative;
+      z-index: 2;
+      width: min(260px, 64vw);
+      height: 34px;
+      margin-top: -16px;
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(240, 240, 240, 0.35) 0%,
+        rgba(220, 20, 20, 0.22) 52%,
+        rgba(10, 10, 12, 0.9) 75%
+      );
+      border: 2px solid rgba(240, 240, 240, 0.35);
+      box-shadow: 0 0 28px rgba(220, 20, 20, 0.35);
+    }
+
+    /* Angle & Role Cycle Controls under Pedestal */
+    .cycle-bar {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      background: rgba(18, 20, 26, 0.86);
+      border: 1px solid var(--galvanized-steel);
+      border-radius: 4px;
+      padding: 4px 10px;
+    }
+
+    .cycle-btn {
+      min-height: 32px;
+      min-width: 34px;
+      padding: 0 8px;
+      background: var(--matte-iron);
+      color: var(--hud-white);
+      border: 1px solid var(--galvanized-steel);
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    .cycle-readout {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--hud-white);
+      opacity: 0.85;
+      min-width: 112px;
+      text-align: center;
+    }
+
+    /* RIGHT COLUMN: ROLE TITLE, STATS BARS, & CONFIRM CTA */
+    .specs-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 5;
+      background: rgba(18, 20, 26, 0.72);
+      border: 1px solid rgba(74, 85, 104, 0.55);
+      padding: 16px;
+      position: relative;
+    }
+
+    .specs-panel::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      width: 14px;
+      height: 14px;
+      border-top: 2px solid var(--cyberdyne-red);
+      border-right: 2px solid var(--cyberdyne-red);
+    }
+
+    .role-title-block {
+      border-bottom: 1px solid rgba(74, 85, 104, 0.45);
+      padding-bottom: 10px;
+    }
+
+    .role-code-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--cyberdyne-red);
+      font-weight: 700;
+    }
+
+    .role-main-name {
+      font-family: var(--font-header);
+      font-size: clamp(20px, 2.5vw, 26px);
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--hud-white);
+      margin: 2px 0 4px;
+      text-transform: uppercase;
+    }
+
+    .role-division {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: rgba(240, 240, 240, 0.68);
+    }
+
+    .stat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .stat-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(240, 240, 240, 0.85);
+    }
+
+    .stat-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(41, 44, 52, 0.95);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(74, 85, 104, 0.45);
+    }
+
+    .stat-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #991b1b 0%, var(--cyberdyne-red) 100%);
+      border-radius: 999px;
+      box-shadow: 0 0 10px var(--cyberdyne-glow);
+      transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Side Arrow Button on Right Edge (Matching Reference 1) */
+    .next-role-arrow {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 12;
+      background: rgba(10, 10, 12, 0.72);
+      border: 1px solid var(--galvanized-steel);
+      color: var(--hud-white);
+      width: 36px;
+      height: 58px;
+      border-radius: 4px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       SCENE 2: MAIN POST-ONBOARDING COMMAND HUB
+       ============================================================ */
+    #main-scene {
+      width: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--hazard-black);
+      background-image:
+        linear-gradient(rgba(74, 85, 104, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 85, 104, 0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
     .main-body {
       flex: 1;
       display: flex;
@@ -328,11 +678,15 @@
 
     .hud-panel {
       position: relative;
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       padding: 24px 20px;
       background: rgba(41, 44, 52, 0.45);
       border: 1px solid var(--galvanized-steel);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
 
     .hud-panel::before {
@@ -345,12 +699,20 @@
       border-top: 2px solid var(--cyberdyne-red);
       border-left: 2px solid var(--cyberdyne-red);
     }
+
+    .profile-badge-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 6px;
+      border: 2px solid var(--cyberdyne-red);
+      object-fit: cover;
+      background: #12141a;
+    }
   </style>
 </head>
 <body>
-  <!-- LOGIN WALL -->
+  <!-- SCENE 0: LOGIN WALL -->
   <div id="login-wall">
-    <!-- Full uncropped artwork banner for portrait phones -->
     <div class="hero-artwork">
       <img src="./images/login.webp" alt="SKYTRUSS" />
     </div>
@@ -376,33 +738,102 @@
     </div>
   </div>
 
-  <!-- POST-LOGIN SHELL -->
-  <div id="main-scene" class="hidden">
+  <!-- SCENE 1: FIRST-LOGIN PROFILE & ROLE SELECTION -->
+  <div id="role-scene" class="hidden">
     <div class="scene-topbar">
       <div class="hud-brand">
         <img src="./images/skytruss.webp" alt="SKYTRUSS" />
         <span>SKYTRUSS</span>
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-size:11px; color:var(--hud-white); opacity:0.75; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" id="user-display-name"></span>
+        <span style="font-size:10px; color:var(--cyberdyne-red); letter-spacing:1.2px; font-weight:700;">PROFILE SETUP</span>
+        <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="role-stage-grid">
+      <!-- LEFT: HEADSHOT SELECTOR GRID & CALLSIGN -->
+      <div class="roster-panel">
+        <div class="section-kicker">
+          SELECT YOUR ROLE
+          <span>6 UNITS</span>
+        </div>
+
+        <div class="headshot-grid" id="headshot-grid"></div>
+
+        <div class="field" style="margin-top:4px;">
+          <label for="profile-callsign">OPERATOR CALLSIGN / NAME</label>
+          <input type="text" id="profile-callsign" placeholder="Enter your name" maxlength="24" />
+        </div>
+      </div>
+
+      <!-- CENTER: FULL-BODY CHARACTER TURNAROUND STAGE -->
+      <div class="showcase-stage">
+        <div class="holo-beam"></div>
+        <div class="character-figure-wrap">
+          <img id="stage-fullbody-img" src="" alt="Selected Role Chassis" />
+        </div>
+        <div class="pedestal-disc"></div>
+
+        <div class="cycle-bar">
+          <button type="button" class="cycle-btn" onclick="cycleAngle(-1)" aria-label="Previous Angle">◀</button>
+          <div class="cycle-readout" id="angle-readout">ANGLE 1 / 4</div>
+          <button type="button" class="cycle-btn" onclick="cycleAngle(1)" aria-label="Next Angle">▶</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: ROLE SPECS & CONFIRM BUTTON -->
+      <div class="specs-panel">
+        <div class="role-title-block">
+          <div class="role-code-tag" id="role-code-tag">UNIT 01 // FIELD OPS</div>
+          <div class="role-main-name" id="role-main-name">THE SALESMAN</div>
+          <div class="role-division" id="role-division">Client Acquisition & Bid Negotiation</div>
+        </div>
+
+        <div class="stat-list" id="role-stat-list"></div>
+
+        <button type="button" class="btn-signin" id="confirm-role-btn" onclick="confirmRoleProfile()">
+          CONFIRM ROLE
+        </button>
+        <div class="status-msg" id="role-status"></div>
+      </div>
+
+      <!-- Quick Next-Character Arrow on Right Edge -->
+      <button type="button" class="next-role-arrow" onclick="cycleRole(1)" aria-label="Next Role">❯</button>
+    </div>
+  </div>
+
+  <!-- SCENE 2: MAIN POST-LOGIN COMMAND HUB -->
+  <div id="main-scene" class="hidden">
+    <div class="scene-topbar">
+      <div class="hud-brand">
+        <img src="./images/skytruss.webp" alt="SKYTRUSS" />
+        <span>SKYTRUSS</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="btn-ghost" onclick="openRoleSelector()">Change Role</button>
         <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
       </div>
     </div>
 
     <div class="main-body">
       <div class="hud-panel">
-        <div style="font-family:var(--font-header); font-size:15px; letter-spacing:1.8px; color:var(--cyberdyne-red); margin-bottom:8px;">
-          SYSTEM ONLINE
+        <img id="hub-avatar" class="profile-badge-avatar" src="" alt="Role Avatar" />
+        <div style="font-family:var(--font-header); font-size:16px; letter-spacing:1.8px; color:var(--cyberdyne-red);" id="hub-role-title">
+          THE SALESMAN
         </div>
-        <p style="color:var(--hud-white); opacity:0.8; font-size:12px; line-height:1.6; margin:0;">
-          AUTHENTICATED VIA SUPABASE. READY FOR MODULE CONSTRUCTION.
+        <div style="font-size:13px; font-weight:700; letter-spacing:1px;" id="hub-callsign">OPERATOR</div>
+        <p style="color:var(--hud-white); opacity:0.78; font-size:12px; line-height:1.6; margin:0;">
+          PROFILE ACTIVE & SYNCED TO SUPABASE. READY FOR SKYTRUSS OPERATIONS.
         </p>
       </div>
     </div>
   </div>
 
   <script>
-    // CONVERT ./images/skytruss.webp TO 512x512 PNG FOR iOS SAFARI HOME SCREEN ICON
+    // ============================================================
+    // 1. PWA ICON & MANIFEST SETUP
+    // ============================================================
     (function setupPWAIconAndManifest() {
       const img = new Image();
       img.onload = function () {
@@ -433,13 +864,351 @@
       img.src = "./images/skytruss.webp";
     })();
 
-    // SUPABASE CREDENTIALS
+    // ============================================================
+    // 2. SUPABASE CONFIG
+    // ============================================================
     const SUPABASE_URL = "https://fwpnbbkyhugzppclsgbl.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QU5rvS7F-VfmocfgP1SqKw_gymqv9bQ";
     const sb = SUPABASE_URL.startsWith("http") ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-    let authMode = "login";
+    // Path to your character turnaround sprite sheet (image 2)
+    const ROLES_SPRITE_PATH = "./images/roles.png";
 
+    // Role definitions mapped to your 2nd image sheet
+    // Grid coordinates: row (0 = top, 1 = bottom), colStart (0..11 across the 12 poses), poseCount
+    const ROLES = [
+      {
+        id: "salesman",
+        code: "UNIT 01 // FRONT-LINE OPS",
+        shortName: "Salesman",
+        name: "The Salesman",
+        division: "Client Acquisition & Bid Negotiation",
+        row: 0,
+        colStart: 0,
+        poseCount: 2,
+        stats: [
+          { label: "NEGOTIATION", value: 94 },
+          { label: "SPEED", value: 88 },
+          { label: "PRECISION", value: 82 },
+          { label: "ARMOR", value: 64 }
+        ]
+      },
+      {
+        id: "estimator",
+        code: "UNIT 02 // ANALYTICS CORE",
+        shortName: "Estimator",
+        name: "The Estimator",
+        division: "Takeoffs, Blueprints & Cost Calculation",
+        row: 0,
+        colStart: 2,
+        poseCount: 2,
+        stats: [
+          { label: "PRECISION", value: 98 },
+          { label: "ANALYTICS", value: 95 },
+          { label: "SPEED", value: 78 },
+          { label: "ARMOR", value: 58 }
+        ]
+      },
+      {
+        id: "superintendent",
+        code: "UNIT 03 // HEAVY FIELD",
+        shortName: "Super",
+        name: "The Superintendent",
+        division: "On-Site Jobsite Command & Safety",
+        row: 0,
+        colStart: 4,
+        poseCount: 4,
+        stats: [
+          { label: "ARMOR", value: 96 },
+          { label: "COMMAND", value: 92 },
+          { label: "PRECISION", value: 84 },
+          { label: "SPEED", value: 68 }
+        ]
+      },
+      {
+        id: "office_manager",
+        code: "UNIT 04 // LOGISTICS",
+        shortName: "Office Mgr",
+        name: "The Office Manager",
+        division: "Multi-Tasking Operations & Dispatch",
+        row: 1,
+        colStart: 0,
+        poseCount: 4,
+        stats: [
+          { label: "MULTI-TASK", value: 97 },
+          { label: "SPEED", value: 91 },
+          { label: "ANALYTICS", value: 86 },
+          { label: "ARMOR", value: 62 }
+        ]
+      },
+      {
+        id: "admin",
+        code: "UNIT 05 // SYSTEM CONTROL",
+        shortName: "Admin",
+        name: "The Admin",
+        division: "Permissions, Compliance & Data Integrity",
+        row: 1,
+        colStart: 6,
+        poseCount: 2,
+        stats: [
+          { label: "SECURITY", value: 96 },
+          { label: "PRECISION", value: 93 },
+          { label: "ANALYTICS", value: 90 },
+          { label: "ARMOR", value: 74 }
+        ]
+      },
+      {
+        id: "project_manager",
+        code: "UNIT 06 // TACTICAL LEAD",
+        shortName: "Project Mgr",
+        name: "The Project Manager",
+        division: "Schedule Execution, Budget & Delivery",
+        row: 1,
+        colStart: 4,
+        poseCount: 4,
+        stats: [
+          { label: "COMMAND", value: 95 },
+          { label: "ANALYTICS", value: 91 },
+          { label: "ARMOR", value: 85 },
+          { label: "SPEED", value: 80 }
+        ]
+      }
+    ];
+
+    let currentUser = null;
+    let authMode = "login";
+    let selectedRoleIdx = 0;
+    let selectedAngleIdx = 0;
+    let slicedAssets = {}; // { roleId: { headshot: dataUrl, poses: [dataUrl, ...] } }
+
+    // ============================================================
+    // 3. SPRITE SHEET SLICER & CHECKERBOARD TRANSPARENCY CLEANER
+    // ============================================================
+    function sliceSpriteSheet() {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+          const w = img.width;
+          const h = img.height;
+          const rowH = Math.floor(h / 2);
+          const colW = w / 12;
+
+          // Helper to crop a region, remove light/gray checkerboard pixels, and return PNG dataURL
+          function extractCleanCrop(sx, sy, sw, sh, isHeadshot = false) {
+            const c = document.createElement("canvas");
+            c.width = Math.round(sw);
+            c.height = Math.round(sh);
+            const ctx = c.getContext("2d");
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+
+            const imgData = ctx.getImageData(0, 0, c.width, c.height);
+            const d = imgData.data;
+            for (let i = 0; i < d.length; i += 4) {
+              const r = d[i], g = d[i + 1], b = d[i + 2];
+              const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
+              // Strip neutral light/mid gray checkerboard squares while preserving metallic shading
+              if (maxDiff < 10 && r > 145) {
+                d[i + 3] = 0;
+              }
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            if (!isHeadshot) return c.toDataURL("image/png");
+
+            // Frame headshot tightly around upper head & shoulders
+            const hc = document.createElement("canvas");
+            hc.width = 180;
+            hc.height = 180;
+            const hctx = hc.getContext("2d");
+            const cropSize = c.width * 0.72;
+            const offsetX = (c.width - cropSize) * 0.5;
+            const offsetY = c.height * 0.02;
+            hctx.drawImage(c, offsetX, offsetY, cropSize, cropSize, 0, 0, 180, 180);
+            return hc.toDataURL("image/png");
+          }
+
+          ROLES.forEach((role) => {
+            const topY = role.row * rowH + rowH * 0.07; // Skip top text label
+            const bodyH = rowH * 0.91;
+            const poses = [];
+
+            for (let p = 0; p < role.poseCount; p++) {
+              const sx = (role.colStart + p) * colW;
+              poses.push(extractCleanCrop(sx, topY, colW, bodyH, false));
+            }
+
+            const headshot = extractCleanCrop(role.colStart * colW, topY, colW, bodyH, true);
+            slicedAssets[role.id] = { headshot, poses };
+          });
+
+          resolve();
+        };
+
+        img.onerror = function () {
+          // Fallback SVG silhouettes if roles.png has not been placed in ./images/ yet
+          ROLES.forEach((role, idx) => {
+            const hue = idx * 12;
+            const svg = `data:image/svg+xml;utf8,${encodeURIComponent(
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360">
+                <rect x="78" y="20" width="44" height="50" rx="14" fill="#4A5568" stroke="#DC1414" stroke-width="3"/>
+                <circle cx="91" cy="42" r="4" fill="#DC1414"/>
+                <circle cx="109" cy="42" r="4" fill="#DC1414"/>
+                <rect x="58" y="78" width="84" height="115" rx="12" fill="#292C34" stroke="#718096" stroke-width="3"/>
+                <rect x="34" y="84" width="18" height="105" rx="8" fill="#4A5568"/>
+                <rect x="148" y="84" width="18" height="105" rx="8" fill="#4A5568"/>
+                <rect x="66" y="200" width="26" height="135" rx="8" fill="#4A5568"/>
+                <rect x="108" y="200" width="26" height="135" rx="8" fill="#4A5568"/>
+              </svg>`
+            )}`;
+            slicedAssets[role.id] = { headshot: svg, poses: [svg] };
+          });
+          resolve();
+        };
+
+        img.src = ROLES_SPRITE_PATH;
+      });
+    }
+
+    // ============================================================
+    // 4. ROLE SELECTOR UI RENDERING
+    // ============================================================
+    function renderRoleGrid() {
+      const grid = document.getElementById("headshot-grid");
+      grid.innerHTML = ROLES.map((role, idx) => {
+        const asset = slicedAssets[role.id];
+        const isActive = idx === selectedRoleIdx;
+        return `
+          <div class="headshot-tile ${isActive ? "active" : ""}" onclick="selectRole(${idx})">
+            <img src="${asset?.headshot || ""}" alt="${role.name}" />
+            <div class="headshot-label">${role.shortName}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderRoleStage() {
+      const role = ROLES[selectedRoleIdx];
+      const asset = slicedAssets[role.id];
+      const poses = asset?.poses || [];
+      if (selectedAngleIdx >= poses.length) selectedAngleIdx = 0;
+
+      document.getElementById("stage-fullbody-img").src = poses[selectedAngleIdx] || "";
+      document.getElementById("angle-readout").textContent = `ANGLE ${selectedAngleIdx + 1} / ${poses.length}`;
+
+      document.getElementById("role-code-tag").textContent = role.code;
+      document.getElementById("role-main-name").textContent = role.name;
+      document.getElementById("role-division").textContent = role.division;
+
+      document.getElementById("role-stat-list").innerHTML = role.stats
+        .map(
+          (st) => `
+          <div class="stat-row">
+            <div class="stat-meta">
+              <span>${st.label}</span>
+              <span>${st.value}%</span>
+            </div>
+            <div class="stat-track">
+              <div class="stat-fill" style="width:${st.value}%;"></div>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    function selectRole(idx) {
+      selectedRoleIdx = (idx + ROLES.length) % ROLES.length;
+      selectedAngleIdx = 0;
+      renderRoleGrid();
+      renderRoleStage();
+    }
+
+    function cycleRole(delta) {
+      selectRole(selectedRoleIdx + delta);
+    }
+
+    function cycleAngle(delta) {
+      const role = ROLES[selectedRoleIdx];
+      const count = slicedAssets[role.id]?.poses?.length || 1;
+      selectedAngleIdx = (selectedAngleIdx + delta + count) % count;
+      renderRoleStage();
+    }
+
+    async function confirmRoleProfile() {
+      if (!currentUser) return;
+      const role = ROLES[selectedRoleIdx];
+      const callsignInput = document.getElementById("profile-callsign").value.trim();
+      const callsign = callsignInput || currentUser.email.split("@")[0];
+      const statusEl = document.getElementById("role-status");
+
+      statusEl.style.color = "#4ade80";
+      statusEl.textContent = "SAVING PROFILE...";
+
+      const profilePayload = {
+        callsign,
+        role_id: role.id,
+        role_name: role.name
+      };
+
+      // Persist locally for instant load
+      localStorage.setItem("skytruss_profile_" + currentUser.id, JSON.stringify(profilePayload));
+
+      // Sync to Supabase user_metadata
+      if (sb) {
+        const { error } = await sb.auth.updateUser({
+          data: {
+            display_name: callsign,
+            role_id: role.id,
+            role_name: role.name
+          }
+        });
+        if (error) {
+          statusEl.style.color = "#DC1414";
+          statusEl.textContent = error.message.toUpperCase();
+          return;
+        }
+      }
+
+      statusEl.textContent = "";
+      enterMainHub(profilePayload);
+    }
+
+    async function openRoleSelector() {
+      await sliceSpriteSheet();
+      const saved = currentUser
+        ? JSON.parse(localStorage.getItem("skytruss_profile_" + currentUser.id) || "null")
+        : null;
+      const existingRoleId = saved?.role_id || currentUser?.user_metadata?.role_id;
+      const foundIdx = ROLES.findIndex((r) => r.id === existingRoleId);
+      if (foundIdx >= 0) selectedRoleIdx = foundIdx;
+
+      document.getElementById("profile-callsign").value =
+        saved?.callsign || currentUser?.user_metadata?.display_name || currentUser?.email?.split("@")[0] || "";
+
+      renderRoleGrid();
+      renderRoleStage();
+
+      document.getElementById("login-wall").classList.add("hidden");
+      document.getElementById("main-scene").classList.add("hidden");
+      document.getElementById("role-scene").classList.remove("hidden");
+    }
+
+    async function enterMainHub(profile) {
+      await sliceSpriteSheet();
+      const role = ROLES.find((r) => r.id === profile.role_id) || ROLES[0];
+      document.getElementById("hub-avatar").src = slicedAssets[role.id]?.headshot || "";
+      document.getElementById("hub-role-title").textContent = role.name.toUpperCase();
+      document.getElementById("hub-callsign").textContent = profile.callsign.toUpperCase();
+
+      document.getElementById("login-wall").classList.add("hidden");
+      document.getElementById("role-scene").classList.add("hidden");
+      document.getElementById("main-scene").classList.remove("hidden");
+    }
+
+    // ============================================================
+    // 5. AUTHENTICATION FLOW
+    // ============================================================
     function toggleAuthMode() {
       authMode = authMode === "login" ? "signup" : "login";
       const isSignup = authMode === "signup";
@@ -467,13 +1236,10 @@
       }
 
       setStatus("AUTHENTICATING...");
-      const res = authMode === "signup"
-        ? await sb.auth.signUp({
-            email,
-            password,
-            options: { data: { display_name: email.split("@")[0] } }
-          })
-        : await sb.auth.signInWithPassword({ email, password });
+      const res =
+        authMode === "signup"
+          ? await sb.auth.signUp({ email, password })
+          : await sb.auth.signInWithPassword({ email, password });
 
       if (res.error) return setStatus(res.error.message.toUpperCase(), true);
       if (res.data?.user) onSignedIn(res.data.user);
@@ -481,14 +1247,33 @@
 
     function onSignedIn(u) {
       if (!u) return;
-      document.getElementById("user-display-name").textContent = (u.user_metadata?.display_name || u.email.split("@")[0]).toUpperCase();
-      document.getElementById("login-wall").classList.add("hidden");
-      document.getElementById("main-scene").classList.remove("hidden");
+      currentUser = u;
+
+      // Check if user already completed Role Selection on first login
+      const localProfile = JSON.parse(localStorage.getItem("skytruss_profile_" + u.id) || "null");
+      const metaRoleId = u.user_metadata?.role_id;
+
+      if (localProfile?.role_id) {
+        enterMainHub(localProfile);
+      } else if (metaRoleId) {
+        const synced = {
+          callsign: u.user_metadata?.display_name || u.email.split("@")[0],
+          role_id: metaRoleId,
+          role_name: u.user_metadata?.role_name || ""
+        };
+        localStorage.setItem("skytruss_profile_" + u.id, JSON.stringify(synced));
+        enterMainHub(synced);
+      } else {
+        // First login: send directly to Role Selection profile setup
+        openRoleSelector();
+      }
     }
 
     async function signOutUser() {
       if (sb) await sb.auth.signOut();
+      currentUser = null;
       document.getElementById("main-scene").classList.add("hidden");
+      document.getElementById("role-scene").classList.add("hidden");
       document.getElementById("login-wall").classList.remove("hidden");
       setStatus("");
     }

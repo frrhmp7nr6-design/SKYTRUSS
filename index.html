@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SKYTRUSS" />
+  <link id="apple-icon" rel="apple-touch-icon" sizes="512x512" href="" />
+  <link rel="icon" type="image/webp" href="./images/skytruss.webp" />
+  <link id="pwa-manifest" rel="manifest" href="" />
+  <title>SKYTRUSS</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-void: #070a0f;
+      --arena-rim: #2c384b;
+      --gold: #f59e0b;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --crimson: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100dvh;
+      overflow: hidden; position: fixed; overscroll-behavior: none;
+      background: var(--bg-void); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+    input, select { user-select: text; font-size: 16px !important; }
+    button { cursor: pointer; font-family: inherit; border: none; font-weight: 700; transition: transform 0.1s, filter 0.15s; }
+    button:active { transform: scale(0.96); }
+    .hidden { display: none !important; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      color: #041e2e; padding: 11px 15px; border-radius: 10px; font-size: 14px;
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,0.08); color: var(--text);
+      border: 1px solid var(--arena-rim); padding: 8px 12px; border-radius: 10px; font-size: 13px;
+    }
+
+    /* LOGIN WALL (USING ./images/login.webp) */
+    #login-wall {
+      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+      background:
+        linear-gradient(180deg, rgba(7, 10, 15, 0.35) 0%, rgba(7, 10, 15, 0.82) 100%),
+        url("./images/login.webp") center center / cover no-repeat;
+      padding: 18px;
+    }
+    .login-card {
+      width: 100%; max-width: 420px; background: rgba(15, 21, 31, 0.88);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--arena-rim); border-radius: 22px; padding: 26px;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.8);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 24px; font-weight: 900; letter-spacing: 1px;
+    }
+    .brand img {
+      width: 40px; height: 40px; border-radius: 10px; object-fit: cover;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+    }
+    .brand span { color: var(--cyan); }
+    .tabs { display: flex; gap: 6px; background: #070a0f; padding: 4px; border-radius: 10px; margin: 14px 0; }
+    .tab-btn { flex: 1; padding: 8px; background: transparent; color: var(--muted); font-size: 13px; border-radius: 8px; }
+    .tab-btn.active { background: #1e293b; color: var(--text); }
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .field label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .field input {
+      background: rgba(7, 10, 15, 0.9); border: 1px solid var(--arena-rim); color: var(--text);
+      padding: 10px 12px; border-radius: 10px; outline: none;
+    }
+    .field input:focus { border-color: var(--cyan); }
+    .status-msg { font-size: 12px; min-height: 18px; margin-top: 8px; }
+
+    /* MAIN APP PLACEHOLDER AFTER LOGIN */
+    #main-scene {
+      width: 100%; height: 100%; display: flex; flex-direction: column;
+      background: radial-gradient(circle at 50% 20%, #162234 0%, #070a0f 75%);
+    }
+    .scene-topbar {
+      height: 52px; padding: 0 16px; background: rgba(10, 14, 22, 0.92);
+      border-bottom: 1px solid var(--arena-rim);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .main-body {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN WALL -->
+  <div id="login-wall">
+    <div class="login-card">
+      <div class="brand">
+        <img src="./images/skytruss.webp" alt="SKYTRUSS" />
+        <div><span>SKY</span>TRUSS</div>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">Sign in or create an account to launch</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-login" onclick="switchAuthMode('login')">Sign In</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchAuthMode('signup')">Create Account</button>
+      </div>
+
+      <div class="field hidden" id="name-field">
+        <label>Display Name</label>
+        <input type="text" id="auth-name" placeholder="Nerabz" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="auth-pass" placeholder="Min 6 characters" />
+      </div>
+
+      <button class="btn-primary" style="width:100%;" id="auth-submit" onclick="handleAuth()">Sign In</button>
+      <div class="status-msg" id="auth-status"></div>
+    </div>
+  </div>
+
+  <!-- POST-LOGIN SHELL -->
+  <div id="main-scene" class="hidden">
+    <div class="scene-topbar">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <img src="./images/skytruss.webp" alt="SKYTRUSS" style="width:28px; height:28px; border-radius:6px;" />
+        <strong style="color:var(--cyan); font-size:16px; letter-spacing:0.8px;">SKYTRUSS</strong>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:13px; color:var(--muted);" id="user-display-name"></span>
+        <button class="btn-ghost" onclick="signOutUser()">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="main-body">
+      <h2 style="margin:0 0 8px;">Signed in to SKYTRUSS</h2>
+      <p style="color:var(--muted); font-size:14px; max-width:360px;">
+        Your Supabase authentication is active. Ready to build the main SKYTRUSS interface next.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // CONVERT ./images/skytruss.webp TO 512x512 PNG FOR iOS SAFARI HOME SCREEN ICON
+    (function setupPWAIconAndManifest() {
+      const img = new Image();
+      img.onload = function () {
+        const c = document.createElement("canvas");
+        c.width = 512;
+        c.height = 512;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, 512, 512);
+        const pngUrl = c.toDataURL("image/png");
+
+        const appleLink = document.getElementById("apple-icon");
+        if (appleLink) appleLink.href = pngUrl;
+
+        const manifest = {
+          name: "SKYTRUSS",
+          short_name: "SKYTRUSS",
+          start_url: "./",
+          display: "standalone",
+          background_color: "#070a0f",
+          theme_color: "#070a0f",
+          icons: [{ src: pngUrl, sizes: "512x512", type: "image/png" }]
+        };
+        const manifestLink = document.getElementById("pwa-manifest");
+        if (manifestLink) {
+          manifestLink.href = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
+        }
+      };
+      img.src = "./images/skytruss.webp";
+    })();
+
+    // SUPABASE CREDENTIALS
+    const SUPABASE_URL = "https://fwpnbbkyhugzppclsgbl.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_QU5rvS7F-VfmocfgP1SqKw_gymqv9bQ";
+    const sb = SUPABASE_URL.startsWith("http") ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    let authMode = "login";
+    let currentUser = null;
+
+    function switchAuthMode(m) {
+      authMode = m;
+      document.getElementById("tab-login").classList.toggle("active", m === "login");
+      document.getElementById("tab-signup").classList.toggle("active", m === "signup");
+      document.getElementById("name-field").classList.toggle("hidden", m === "login");
+      document.getElementById("auth-submit").textContent = m === "login" ? "Sign In" : "Create Account";
+      setStatus("");
+    }
+
+    function setStatus(msg, err = false) {
+      const el = document.getElementById("auth-status");
+      el.style.color = err ? "#ef4444" : "#22c55e";
+      el.textContent = msg;
+    }
+
+    async function handleAuth() {
+      if (!sb) return setStatus("Missing Supabase keys.", true);
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-pass").value;
+      const name = document.getElementById("auth-name").value.trim() || email.split("@")[0];
+
+      if (!email || password.length < 6) {
+        return setStatus("Enter a valid email and 6+ char password.", true);
+      }
+
+      setStatus("Connecting...");
+      const res = authMode === "signup"
+        ? await sb.auth.signUp({
+            email,
+            password,
+            options: { data: { display_name: name } }
+          })
+        : await sb.auth.signInWithPassword({ email, password });
+
+      if (res.error) return setStatus(res.error.message, true);
+      if (res.data?.user) onSignedIn(res.data.user);
+    }
+
+    function onSignedIn(u) {
+      if (!u) return;
+      currentUser = {
+        id: u.id,
+        email: u.email,
+        name: u.user_metadata?.display_name || u.email.split("@")[0]
+      };
+      document.getElementById("user-display-name").textContent = currentUser.name;
+      document.getElementById("login-wall").classList.add("hidden");
+      document.getElementById("main-scene").classList.remove("hidden");
+    }
+
+    async function signOutUser() {
+      if (sb) await sb.auth.signOut();
+      currentUser = null;
+      document.getElementById("main-scene").classList.add("hidden");
+      document.getElementById("login-wall").classList.remove("hidden");
+      setStatus("");
+    }
+
+    // AUTO-RESTORE SESSION ON LAUNCH
+    (async () => {
+      if (!sb) return;
+      const { data } = await sb.auth.getSession();
+      if (data?.session?.user) onSignedIn(data.session.user);
+    })();
+  </script>
+</body>
+</html>

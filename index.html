@@ -71,7 +71,7 @@
       display: none !important;
     }
 
-    /* FULL-BLEED ARTWORK WITH HUD CONTROLS TUCKED UNDER LEFT SKYTRUSS LOGO */
+    /* FULL-BLEED ARTWORK WITH BORDERLESS FLOATING INPUTS UNDER LEFT LOGO */
     #login-wall {
       position: relative;
       width: 100%;
@@ -86,31 +86,23 @@
       background: url("./images/login.webp") 14% 14% / cover no-repeat;
       padding:
         calc(20px + env(safe-area-inset-top))
-        calc(20px + env(safe-area-inset-right))
-        calc(28px + env(safe-area-inset-bottom))
-        calc(20px + env(safe-area-inset-left));
+        calc(22px + env(safe-area-inset-right))
+        calc(32px + env(safe-area-inset-bottom))
+        calc(22px + env(safe-area-inset-left));
     }
 
-    /* Subtle dark gradient & micro-scanlines under the lower-left logo region */
+    /* Soft dark vignette in the lower-left corner behind the floating inputs */
     #login-wall::before {
       content: "";
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background:
-        repeating-linear-gradient(
-          0deg,
-          rgba(10, 10, 12, 0.18) 0px,
-          rgba(10, 10, 12, 0.18) 1px,
-          transparent 1px,
-          transparent 3px
-        ),
-        radial-gradient(
-          circle at 20% 88%,
-          rgba(10, 10, 12, 0.88) 0%,
-          rgba(10, 10, 12, 0.45) 45%,
-          transparent 75%
-        );
+      background: radial-gradient(
+        circle at 20% 88%,
+        rgba(10, 10, 12, 0.82) 0%,
+        rgba(10, 10, 12, 0.38) 45%,
+        transparent 75%
+      );
       z-index: 1;
     }
 
@@ -125,44 +117,15 @@
       }
     }
 
-    /* Tactical HUD Reticle Container */
+    /* Completely borderless, transparent layout stack */
     .login-stack {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 330px;
+      max-width: 320px;
       display: flex;
       flex-direction: column;
       gap: 11px;
-      padding: 14px;
-      background: rgba(10, 10, 12, 0.36);
-      backdrop-filter: blur(18px) saturate(135%);
-      -webkit-backdrop-filter: blur(18px) saturate(135%);
-      border: 1px solid rgba(74, 85, 104, 0.35);
-    }
-
-    /* Cyberdyne Corner Brackets matching the Brand Board */
-    .login-stack::before,
-    .login-stack::after {
-      content: "";
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      pointer-events: none;
-    }
-
-    .login-stack::before {
-      top: -1px;
-      left: -1px;
-      border-top: 2px solid var(--cyberdyne-red);
-      border-left: 2px solid var(--cyberdyne-red);
-    }
-
-    .login-stack::after {
-      bottom: -1px;
-      right: -1px;
-      border-bottom: 2px solid var(--cyberdyne-red);
-      border-right: 2px solid var(--cyberdyne-red);
     }
 
     .field {
@@ -178,43 +141,47 @@
       letter-spacing: 1.4px;
       text-transform: uppercase;
       color: var(--hud-white);
-      opacity: 0.82;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+      opacity: 0.85;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.98);
+      padding-left: 2px;
     }
 
     .field input {
       width: 100%;
-      min-height: 44px;
-      padding: 10px 12px;
-      border-radius: 4px;
-      background: rgba(41, 44, 52, 0.55);
-      border: 1px solid var(--galvanized-steel);
+      min-height: 45px;
+      padding: 10px 13px;
+      border-radius: 5px;
+      background: rgba(10, 10, 12, 0.42);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      border: 1px solid rgba(74, 85, 104, 0.65);
       color: var(--hud-white);
       outline: none;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
     }
 
     .field input::placeholder {
-      color: rgba(240, 240, 240, 0.38);
+      color: rgba(240, 240, 240, 0.42);
     }
 
     .field input:focus {
-      background: rgba(10, 10, 12, 0.78);
+      background: rgba(10, 10, 12, 0.72);
       border-color: var(--cyberdyne-red);
-      box-shadow: 0 0 14px var(--cyberdyne-glow);
+      box-shadow: 0 0 16px var(--cyberdyne-glow);
     }
 
     .btn-signin {
       width: 100%;
       margin-top: 4px;
-      border-radius: 4px;
+      border-radius: 5px;
       font-size: 13px;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--hud-white);
       background: linear-gradient(180deg, #ef2323 0%, var(--cyberdyne-red) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 0 20px var(--cyberdyne-glow);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 22px var(--cyberdyne-glow);
     }
 
     .btn-signin:hover {
@@ -227,10 +194,11 @@
       min-height: 28px;
       padding: 2px;
       font-family: var(--font-mono);
-      color: rgba(240, 240, 240, 0.7);
+      color: rgba(240, 240, 240, 0.78);
       font-size: 11px;
       font-weight: 500;
       letter-spacing: 0.4px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.98);
     }
 
     .mode-toggle span {
@@ -245,6 +213,7 @@
       min-height: 15px;
       text-align: center;
       letter-spacing: 0.3px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.98);
     }
 
     /* POST-LOGIN SHELL (TACTICAL HUD) */

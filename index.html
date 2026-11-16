@@ -1053,6 +1053,149 @@
       border: 1px solid rgba(220, 20, 20, 0.55);
     }
 
+    .review-photos-btn {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #38bdf8;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 3px;
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ============================================================
+       PHOTO REVIEW MODAL & FULL-SCREEN LIGHTBOX
+       ============================================================ */
+    #photo-review-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background: rgba(10, 10, 12, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      padding:
+        calc(16px + env(safe-area-inset-top))
+        18px
+        calc(18px + env(safe-area-inset-bottom))
+        18px;
+    }
+
+    .modal-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(220, 20, 20, 0.55);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+
+    .photo-grid {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 12px;
+      align-content: start;
+      padding-bottom: 20px;
+    }
+
+    .photo-card {
+      background: rgba(18, 20, 26, 0.92);
+      border: 1px solid rgba(74, 85, 104, 0.65);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.14s ease, border-color 0.2s ease;
+    }
+
+    .photo-card:hover {
+      border-color: var(--cyberdyne-red);
+      transform: translateY(-2px);
+    }
+
+    .photo-thumb-wrap {
+      aspect-ratio: 4 / 3;
+      position: relative;
+      background: #050507;
+      overflow: hidden;
+    }
+
+    .photo-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .sync-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 2px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .sync-badge.cloud {
+      background: rgba(22, 163, 74, 0.88);
+      color: #ffffff;
+      border: 1px solid #4ade80;
+    }
+
+    .sync-badge.local {
+      background: rgba(217, 119, 6, 0.88);
+      color: #ffffff;
+      border: 1px solid #fbbf24;
+    }
+
+    .photo-meta {
+      padding: 8px 10px;
+      font-size: 9.5px;
+      color: rgba(240, 240, 240, 0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      border-top: 1px solid rgba(74, 85, 104, 0.4);
+    }
+
+    #photo-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: rgba(5, 5, 7, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #photo-lightbox img {
+      max-width: 94vw;
+      max-height: 78dvh;
+      border: 1.5px solid var(--cyberdyne-red);
+      border-radius: 4px;
+      box-shadow: 0 0 32px rgba(220, 20, 20, 0.35);
+      object-fit: contain;
+    }
+
     .leaflet-control-attribution {
       background: rgba(10, 10, 12, 0.78) !important;
       color: rgba(240, 240, 240, 0.55) !important;
@@ -1258,6 +1401,7 @@
       <div class="map-toolbar-btns">
         <button type="button" class="territory-pill active" id="btn-gps-center" onclick="centerMapOnUserGPS()">◎ MY LOCATION</button>
         <button type="button" class="territory-pill" onclick="fitAllTerritoryJobs()">ALL TERRITORY JOBS</button>
+        <button type="button" class="territory-pill" onclick="fetchAllCloudJobLogs(true)">↻ SYNC CLOUD PHOTOS</button>
       </div>
     </div>
 
@@ -1275,6 +1419,36 @@
         <div class="job-card-list" id="job-card-list"></div>
       </div>
     </div>
+  </div>
+
+  <!-- PROGRESS PHOTO REVIEW MODAL -->
+  <div id="photo-review-modal" class="hidden">
+    <div class="modal-topbar">
+      <div>
+        <div style="font-family:var(--font-header); font-size:16px; font-weight:900; letter-spacing:1.6px; color:var(--hud-white);" id="modal-job-title">
+          JOB PROGRESS ARCHIVE
+        </div>
+        <div style="font-size:10px; color:var(--cyberdyne-red); font-weight:700; letter-spacing:1px;" id="modal-job-subtitle">
+          SHARED SUPABASE CLOUD + LOCAL FIELD LOGS
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button type="button" class="hud-action-chip" id="modal-snap-btn" onclick="triggerJobCamera(selectedJobId)">
+          📷 SNAP NEW PHOTO
+        </button>
+        <button type="button" class="btn-ghost" onclick="closePhotoReviewModal()">✕ CLOSE</button>
+      </div>
+    </div>
+
+    <div id="photo-sync-banner" style="font-size:10px; color:#94a3b8; margin-bottom:10px;"></div>
+    <div id="photo-grid-container" class="photo-grid"></div>
+  </div>
+
+  <!-- FULL-SCREEN PHOTO LIGHTBOX -->
+  <div id="photo-lightbox" class="hidden" onclick="closePhotoLightbox()">
+    <img id="lightbox-img" src="" alt="Full Progress Photo" />
+    <div id="lightbox-caption" style="margin-top:12px; font-size:11px; color:var(--hud-white); text-align:center;"></div>
+    <button type="button" class="btn-ghost" style="margin-top:12px;" onclick="closePhotoLightbox()">✕ CLOSE PREVIEW</button>
   </div>
 
   <script>
@@ -1336,6 +1510,8 @@
 
     let selectedJobId = "JOB-104";
     let activePhotoJobId = null;
+    // Holds shared cloud logs keyed by job_id
+    let cloudJobLogsCache = {};
 
     const ROLES = [
       {
@@ -1882,7 +2058,7 @@
     let leafletMap = null;
     let leafletMarkersLayer = null;
 
-    function openProjectMap() {
+    async function openProjectMap() {
       document.getElementById("login-wall").classList.add("hidden");
       document.getElementById("role-scene").classList.add("hidden");
       document.getElementById("main-scene").classList.add("hidden");
@@ -1890,6 +2066,7 @@
 
       initLeafletEarthMap();
       renderJobCardsList();
+      await fetchAllCloudJobLogs(false);
     }
 
     function returnToGlobeHub() {
@@ -2011,12 +2188,21 @@
       }
     }
 
+    function getCombinedJobLogs(jobId) {
+      const cloudLogs = cloudJobLogsCache[jobId] || [];
+      const localLogs = JSON.parse(localStorage.getItem("skytruss_job_logs_" + jobId) || "[]");
+      // Combine cloud + unsynced local logs, newest first
+      const combined = [...cloudLogs, ...localLogs];
+      combined.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      return combined;
+    }
+
     function renderJobCardsList() {
       document.getElementById("job-count-label").textContent = `${TERRITORY_JOBS.length} SITES`;
       const listEl = document.getElementById("job-card-list");
       listEl.innerHTML = TERRITORY_JOBS.map((job) => {
         const isSel = job.id === selectedJobId;
-        const savedLogs = JSON.parse(localStorage.getItem("skytruss_job_logs_" + job.id) || "[]");
+        const allLogs = getCombinedJobLogs(job.id);
         return `
           <div class="job-item ${isSel ? "selected" : ""}" onclick="selectTerritoryJob('${job.id}', true)">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
@@ -2028,11 +2214,13 @@
             <div style="font-size:10px; color:rgba(240,240,240,0.78); margin-bottom:4px;">
               📍 ${job.city} • DUE: <strong>${job.due}</strong>
             </div>
-            <div style="font-size:10px; color:#94a3b8; margin-bottom:6px;">
+            <div style="font-size:10px; color:#94a3b8; margin-bottom:8px;">
               ${job.trusses} (MAX SPAN: ${job.span})
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:9px; color:#38bdf8;">📷 ${savedLogs.length} Progress Photos</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+              <button type="button" class="review-photos-btn" onclick="event.stopPropagation(); openPhotoReviewModal('${job.id}')">
+                📷 Review ${allLogs.length} Progress Photos
+              </button>
               <button type="button" class="hud-action-chip" style="min-height:28px; padding:2px 10px; font-size:9px;" onclick="event.stopPropagation(); triggerJobCamera('${job.id}')">
                 📷 SNAP PROGRESS
               </button>
@@ -2043,10 +2231,42 @@
     }
 
     // ============================================================
-    // 8. IN-APP CAMERA PROGRESS CAPTURE
+    // 8. IN-APP CAMERA CAPTURE, COMPRESSION & SUPABASE CLOUD SYNC
     // ============================================================
+    async function fetchAllCloudJobLogs(showNotice = false) {
+      if (!sb) return;
+      try {
+        const { data, error } = await sb
+          .from("job_logs")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          const grouped = {};
+          data.forEach((row) => {
+            if (!grouped[row.job_id]) grouped[row.job_id] = [];
+            grouped[row.job_id].push({
+              id: row.id,
+              photo: row.photo_url,
+              operator: row.operator,
+              timestamp: row.created_at,
+              source: "cloud"
+            });
+          });
+          cloudJobLogsCache = grouped;
+          renderJobCardsList();
+          if (showNotice) {
+            document.getElementById("territory-subtitle").textContent =
+              `CLOUD SYNC COMPLETE // ${data.length} TOTAL SHARED PHOTOS`;
+          }
+        }
+      } catch (err) {
+        console.warn("Supabase job_logs sync notice:", err);
+      }
+    }
+
     function triggerJobCamera(jobId) {
-      activePhotoJobId = jobId;
+      activePhotoJobId = jobId || selectedJobId;
       const camInput = document.getElementById("live-job-camera");
       if (camInput) {
         camInput.value = "";
@@ -2054,24 +2274,192 @@
       }
     }
 
-    function handleCapturedProgressPhoto(event) {
+    // Compress high-res mobile photos to 1280px max dimension JPEG
+    function compressImageFile(file, maxDim = 1280, quality = 0.82) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            const c = document.createElement("canvas");
+            c.width = w;
+            c.height = h;
+            const ctx = c.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            const dataUrl = c.toDataURL("image/jpeg", quality);
+            c.toBlob(
+              (blob) => resolve({ blob, dataUrl }),
+              "image/jpeg",
+              quality
+            );
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleCapturedProgressPhoto(event) {
       const file = event.target.files[0];
       if (!file || !activePhotoJobId) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const photoDataUrl = e.target.result;
-        const jobLogs = JSON.parse(localStorage.getItem("skytruss_job_logs_" + activePhotoJobId) || "[]");
-        jobLogs.push({
-          timestamp: new Date().toISOString(),
-          photo: photoDataUrl,
-          operator: currentUser?.email || "Operator"
+      const jobId = activePhotoJobId;
+      const savedProfile = currentUser
+        ? JSON.parse(localStorage.getItem("skytruss_profile_" + currentUser.id) || "null")
+        : null;
+      const operatorName =
+        savedProfile?.callsign ||
+        currentUser?.user_metadata?.display_name ||
+        currentUser?.email?.split("@")[0] ||
+        "Operator";
+
+      document.getElementById("territory-subtitle").textContent =
+        `PROCESSING & UPLOADING PHOTO FOR ${jobId}...`;
+
+      const { blob, dataUrl } = await compressImageFile(file, 1280, 0.82);
+      const nowIso = new Date().toISOString();
+      let syncedToCloud = false;
+
+      // 1. Attempt live upload to Supabase Storage + Database Table
+      if (sb && blob) {
+        try {
+          const filePath = `${jobId}/${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
+          const { error: uploadError } = await sb.storage
+            .from("job-progress")
+            .upload(filePath, blob, { contentType: "image/jpeg", upsert: false });
+
+          if (!uploadError) {
+            const { data: pubData } = sb.storage.from("job-progress").getPublicUrl(filePath);
+            const publicUrl = pubData?.publicUrl;
+
+            if (publicUrl) {
+              const { error: dbErr } = await sb.from("job_logs").insert([
+                {
+                  job_id: jobId,
+                  operator: operatorName,
+                  photo_url: publicUrl,
+                  created_at: nowIso
+                }
+              ]);
+
+              if (!dbErr) {
+                syncedToCloud = true;
+                await fetchAllCloudJobLogs(false);
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("Cloud upload fallback to local storage:", err);
+        }
+      }
+
+      // 2. If offline or Supabase bucket/table not created yet, store compressed photo locally
+      if (!syncedToCloud) {
+        const storageKey = "skytruss_job_logs_" + jobId;
+        const jobLogs = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        jobLogs.unshift({
+          timestamp: nowIso,
+          photo: dataUrl,
+          operator: operatorName,
+          source: "local"
         });
-        localStorage.setItem("skytruss_job_logs_" + activePhotoJobId, JSON.stringify(jobLogs));
-        renderJobCardsList();
-        alert(`PROGRESS PHOTO SAVED FOR ${activePhotoJobId}!\nLogged successfully to local storage.`);
-      };
-      reader.readAsDataURL(file);
+        // Keep up to 15 compressed photos per job in localStorage
+        localStorage.setItem(storageKey, JSON.stringify(jobLogs.slice(0, 15)));
+      }
+
+      document.getElementById("territory-subtitle").textContent = syncedToCloud
+        ? `PHOTO SYNCED TO SUPABASE CLOUD // ${jobId}`
+        : `PHOTO SAVED TO DEVICE STORAGE // ${jobId}`;
+
+      renderJobCardsList();
+      openPhotoReviewModal(jobId);
+    }
+
+    async function openPhotoReviewModal(jobId) {
+      selectedJobId = jobId;
+      const job = TERRITORY_JOBS.find((j) => j.id === jobId);
+      if (!job) return;
+
+      document.getElementById("modal-job-title").textContent = `${job.id} • ${job.name}`;
+      document.getElementById("modal-job-subtitle").textContent = `SECTOR: ${job.city.toUpperCase()} // ${job.status}`;
+      document.getElementById("photo-sync-banner").textContent = "SYNCING LATEST CLOUD PHOTOS FROM SUPABASE...";
+      document.getElementById("photo-review-modal").classList.remove("hidden");
+
+      await fetchAllCloudJobLogs(false);
+
+      const allLogs = getCombinedJobLogs(jobId);
+      const cloudCount = (cloudJobLogsCache[jobId] || []).length;
+      const localCount = allLogs.length - cloudCount;
+
+      document.getElementById("photo-sync-banner").textContent =
+        `SHOWING ${allLogs.length} PHOTOS (${cloudCount} SHARED IN SUPABASE CLOUD • ${localCount} DEVICE-ONLY)`;
+
+      const container = document.getElementById("photo-grid-container");
+      if (allLogs.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align:center; color:rgba(240,240,240,0.55); padding:48px 20px; border:1px dashed rgba(74,85,104,0.5); border-radius:4px;">
+            NO PROGRESS PHOTOS LOGGED YET FOR ${job.name}.<br /><br />
+            TAP <strong>"📷 SNAP NEW PHOTO"</strong> ABOVE TO DOCUMENT THIS SITE.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = allLogs
+        .map((log, idx) => {
+          const dt = new Date(log.timestamp);
+          const dateStr = dt.toLocaleDateString([], { month: "short", day: "numeric" });
+          const timeStr = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          const isCloud = log.source === "cloud";
+          const safeCaption = `${job.id} • Snapped by ${log.operator || "Operator"} on ${dateStr} at ${timeStr}`;
+          return `
+            <div class="photo-card" onclick="openPhotoLightbox('${idx}', '${jobId}')">
+              <div class="photo-thumb-wrap">
+                <img src="${log.photo}" alt="Job Progress" loading="lazy" />
+                <span class="sync-badge ${isCloud ? "cloud" : "local"}">${isCloud ? "CLOUD" : "LOCAL"}</span>
+              </div>
+              <div class="photo-meta">
+                <span style="color:var(--cyberdyne-red); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  👤 ${(log.operator || "OPERATOR").toUpperCase()}
+                </span>
+                <span>📅 ${dateStr} • ${timeStr}</span>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function closePhotoReviewModal() {
+      document.getElementById("photo-review-modal").classList.add("hidden");
+    }
+
+    function openPhotoLightbox(logIdx, jobId) {
+      const logs = getCombinedJobLogs(jobId);
+      const item = logs[Number(logIdx)];
+      if (!item) return;
+
+      const dt = new Date(item.timestamp);
+      document.getElementById("lightbox-img").src = item.photo;
+      document.getElementById("lightbox-caption").textContent =
+        `${jobId} • OPERATOR: ${(item.operator || "Operator").toUpperCase()} • ${dt.toLocaleString()}`;
+      document.getElementById("photo-lightbox").classList.remove("hidden");
+    }
+
+    function closePhotoLightbox() {
+      document.getElementById("photo-lightbox").classList.add("hidden");
+      document.getElementById("lightbox-img").src = "";
     }
 
     // ============================================================
@@ -2200,6 +2588,7 @@
 
       initEarthGlobe();
       requestUserLocation(false);
+      fetchAllCloudJobLogs(false);
     }
 
     // ============================================================
@@ -2269,6 +2658,7 @@
       document.getElementById("main-scene").classList.add("hidden");
       document.getElementById("role-scene").classList.add("hidden");
       document.getElementById("map-scene").classList.add("hidden");
+      document.getElementById("photo-review-modal").classList.add("hidden");
       document.getElementById("login-wall").classList.remove("hidden");
       setStatus("");
     }

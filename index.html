@@ -1231,6 +1231,9 @@
 
   <!-- SCENE 3: CURRENT PROJECT MAP -->
   <div id="map-scene" class="hidden">
+    <!-- Hidden native camera input for in-app progress snapping -->
+    <input type="file" id="live-job-camera" accept="image/*" capture="environment" style="display:none;" onchange="handleCapturedProgressPhoto(event)" />
+
     <div class="scene-topbar">
       <div class="hud-brand">
         <img src="./images/skytruss.webp" alt="SKYTRUSS" />
@@ -1332,6 +1335,7 @@
     ];
 
     let selectedJobId = "JOB-104";
+    let activePhotoJobId = null;
 
     const ROLES = [
       {
@@ -1464,8 +1468,6 @@
         const d = idata.data;
         for (let i = 0; i < d.length; i += 4) {
           const r = d[i], g = d[i + 1], b = d[i + 2];
-          
-          // Uniformly strip checkerboards, light grays, whites, and dark backgrounds
           const isGray = Math.abs(r - g) < 12 && Math.abs(g - b) < 12 && Math.abs(r - b) < 12;
           const isCheckerboardOrLight = (isGray && r > 125) || (r > 230 && g > 230 && b > 230);
           const isDarkBackground = r < 16 && g < 16 && b < 16;
@@ -2014,6 +2016,7 @@
       const listEl = document.getElementById("job-card-list");
       listEl.innerHTML = TERRITORY_JOBS.map((job) => {
         const isSel = job.id === selectedJobId;
+        const savedLogs = JSON.parse(localStorage.getItem("skytruss_job_logs_" + job.id) || "[]");
         return `
           <div class="job-item ${isSel ? "selected" : ""}" onclick="selectTerritoryJob('${job.id}', true)">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
@@ -2025,8 +2028,14 @@
             <div style="font-size:10px; color:rgba(240,240,240,0.78); margin-bottom:4px;">
               📍 ${job.city} • DUE: <strong>${job.due}</strong>
             </div>
-            <div style="font-size:10px; color:#94a3b8;">
+            <div style="font-size:10px; color:#94a3b8; margin-bottom:6px;">
               ${job.trusses} (MAX SPAN: ${job.span})
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:9px; color:#38bdf8;">📷 ${savedLogs.length} Progress Photos</span>
+              <button type="button" class="hud-action-chip" style="min-height:28px; padding:2px 10px; font-size:9px;" onclick="event.stopPropagation(); triggerJobCamera('${job.id}')">
+                📷 SNAP PROGRESS
+              </button>
             </div>
           </div>
         `;
@@ -2034,7 +2043,39 @@
     }
 
     // ============================================================
-    // 8. ROLE SELECTOR & NAVIGATION FLOW
+    // 8. IN-APP CAMERA PROGRESS CAPTURE
+    // ============================================================
+    function triggerJobCamera(jobId) {
+      activePhotoJobId = jobId;
+      const camInput = document.getElementById("live-job-camera");
+      if (camInput) {
+        camInput.value = "";
+        camInput.click();
+      }
+    }
+
+    function handleCapturedProgressPhoto(event) {
+      const file = event.target.files[0];
+      if (!file || !activePhotoJobId) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const photoDataUrl = e.target.result;
+        const jobLogs = JSON.parse(localStorage.getItem("skytruss_job_logs_" + activePhotoJobId) || "[]");
+        jobLogs.push({
+          timestamp: new Date().toISOString(),
+          photo: photoDataUrl,
+          operator: currentUser?.email || "Operator"
+        });
+        localStorage.setItem("skytruss_job_logs_" + activePhotoJobId, JSON.stringify(jobLogs));
+        renderJobCardsList();
+        alert(`PROGRESS PHOTO SAVED FOR ${activePhotoJobId}!\nLogged successfully to local storage.`);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ============================================================
+    // 9. ROLE SELECTOR & NAVIGATION FLOW
     // ============================================================
     function renderRoleGrid() {
       const grid = document.getElementById("headshot-grid");
@@ -2162,7 +2203,7 @@
     }
 
     // ============================================================
-    // 9. AUTHENTICATION FLOW
+    // 10. AUTHENTICATION FLOW
     // ============================================================
     function toggleAuthMode() {
       authMode = authMode === "login" ? "signup" : "login";

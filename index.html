@@ -375,7 +375,7 @@
     .headshot-tile {
       position: relative;
       aspect-ratio: 1 / 1;
-      background: linear-gradient(180deg, rgba(41, 44, 52, 0.85) 0%, rgba(10, 10, 12, 0.96) 100%);
+      background: #07080b;
       border: 1px solid rgba(74, 85, 104, 0.7);
       border-radius: 4px;
       overflow: hidden;
@@ -401,7 +401,19 @@
       right: 0;
       height: 3px;
       background: var(--cyberdyne-red);
-      z-index: 3;
+      z-index: 4;
+    }
+
+    /* Video background for profile tiles & hub badge */
+    .headshot-tile video.tile-video,
+    .hub-avatar-wrap video.tile-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      pointer-events: none;
     }
 
     .headshot-tile img {
@@ -411,14 +423,15 @@
       height: 100%;
       object-fit: cover;
       object-position: top center;
+      z-index: 2;
     }
 
     .headshot-label {
       position: relative;
-      z-index: 2;
+      z-index: 3;
       width: 100%;
       padding: 3px 4px;
-      background: rgba(10, 10, 12, 0.88);
+      background: rgba(10, 10, 12, 0.92);
       font-family: var(--font-mono);
       font-size: 9px;
       font-weight: 700;
@@ -690,14 +703,25 @@
       gap: 10px;
     }
 
-    .profile-badge-avatar {
+    .hub-avatar-wrap {
+      position: relative;
       width: 42px;
       height: 42px;
       border-radius: 5px;
       border: 1.5px solid var(--cyberdyne-red);
+      overflow: hidden;
+      background: #12141a;
+      flex-shrink: 0;
+    }
+
+    .hub-avatar-wrap img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       object-position: top center;
-      background: #12141a;
+      z-index: 2;
     }
 
     .globe-command-stage {
@@ -1154,7 +1178,10 @@
 
     <div class="hub-operator-strip">
       <div class="hub-operator-id">
-        <img id="hub-avatar" class="profile-badge-avatar" src="" alt="Role Avatar" />
+        <div class="hub-avatar-wrap">
+          <video class="tile-video" src="video_1.mp4" autoplay muted loop playsinline></video>
+          <img id="hub-avatar" src="" alt="Role Avatar" />
+        </div>
         <div>
           <div style="font-family:var(--font-header); font-size:13px; font-weight:900; letter-spacing:1.4px; color:var(--hud-white);" id="hub-callsign">
             OPERATOR
@@ -1401,10 +1428,10 @@
     let currentUser = null;
     let authMode = "login";
     let selectedRoleIdx = 0;
-    let roleHeadshots = {};
+    let roleAvatars = {};
 
     // ============================================================
-    // 3. UNIFORM MATRIX RAIN BACKGROUND HEADSHOT PROCESSOR
+    // 3. TRANSPARENT AVATAR PROCESSOR (VIDEO BACKGROUND OVERLAY)
     // ============================================================
     function loadImageElement(src) {
       return new Promise((resolve) => {
@@ -1415,36 +1442,13 @@
       });
     }
 
-    function generateMatrixRainHeadshot(img) {
+    function generateTransparentAvatar(img) {
       const size = 256;
       const c = document.createElement("canvas");
       c.width = size;
       c.height = size;
       const ctx = c.getContext("2d");
 
-      // 1. Base Dark Terminal Background
-      ctx.fillStyle = "#07080b";
-      ctx.fillRect(0, 0, size, size);
-
-      // 2. Uniform Cyberdyne Red Matrix Number Rainfall Backdrop
-      ctx.font = "bold 11px 'Roboto Mono', monospace";
-      const chars = "0101010101010101ABCDEF0123456789";
-      const cols = 16;
-      const colWidth = size / cols;
-      for (let col = 0; col < cols; col++) {
-        const x = col * colWidth + 4;
-        const dropLen = 7 + Math.floor(Math.random() * 8);
-        const startY = Math.floor(Math.random() * size);
-        for (let row = 0; row < dropLen; row++) {
-          const y = (startY + row * 15) % size;
-          const alpha = (row + 1) / dropLen * 0.42;
-          ctx.fillStyle = row === dropLen - 1 ? `rgba(255, 255, 255, 0.75)` : `rgba(220, 20, 20, ${alpha})`;
-          const ch = chars[Math.floor(Math.random() * chars.length)];
-          ctx.fillText(ch, x, y);
-        }
-      }
-
-      // 3. Composite Transparent Headshot over Matrix Rain
       if (img) {
         const temp = document.createElement("canvas");
         temp.width = size;
@@ -1460,14 +1464,13 @@
         for (let i = 0; i < d.length; i += 4) {
           const r = d[i], g = d[i + 1], b = d[i + 2];
           const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
-          if (maxDiff < 10 && r > 155) {
+          if (maxDiff < 12 && r > 150) {
             d[i + 3] = 0;
           }
         }
         tctx.putImageData(idata, 0, 0);
         ctx.drawImage(temp, 0, 0, size, size);
       } else {
-        // Fallback Vector Headshot if image file not found yet
         ctx.fillStyle = "rgba(41, 44, 52, 0.85)";
         ctx.beginPath();
         ctx.arc(128, 92, 48, 0, Math.PI * 2);
@@ -1493,7 +1496,7 @@
             loadedImg = await loadImageElement(url);
             if (loadedImg) break;
           }
-          roleHeadshots[role.id] = generateMatrixRainHeadshot(loadedImg);
+          roleAvatars[role.id] = generateTransparentAvatar(loadedImg);
         })
       );
     }
@@ -2033,7 +2036,8 @@
         const isActive = idx === selectedRoleIdx;
         return `
           <div class="headshot-tile ${isActive ? "active" : ""}" onclick="selectRole(${idx})">
-            <img src="${roleHeadshots[role.id] || ""}" alt="${role.name}" />
+            <video class="tile-video" src="video_1.mp4" autoplay muted loop playsinline></video>
+            <img src="${roleAvatars[role.id] || ""}" alt="${role.name}" />
             <div class="headshot-label">${role.shortName}</div>
           </div>
         `;
@@ -2138,7 +2142,7 @@
     async function enterMainHub(profile) {
       await loadAllRoleHeadshots();
       const role = ROLES.find((r) => r.id === profile.role_id) || ROLES[0];
-      document.getElementById("hub-avatar").src = roleHeadshots[role.id] || "";
+      document.getElementById("hub-avatar").src = roleAvatars[role.id] || "";
       document.getElementById("hub-role-title").textContent = role.name.toUpperCase();
       document.getElementById("hub-callsign").textContent = profile.callsign.toUpperCase();
 

@@ -1179,7 +1179,7 @@
     <div class="hub-operator-strip">
       <div class="hub-operator-id">
         <div class="hub-avatar-wrap">
-          <video class="tile-video" src="video_1.mp4" autoplay muted loop playsinline></video>
+          <video class="tile-video" src="red_digital_rain_bright_loop_final.mp4" autoplay muted loop playsinline preload="auto"></video>
           <img id="hub-avatar" src="" alt="Role Avatar" />
         </div>
         <div>
@@ -1431,7 +1431,7 @@
     let roleAvatars = {};
 
     // ============================================================
-    // 3. TRANSPARENT AVATAR PROCESSOR (VIDEO BACKGROUND OVERLAY)
+    // 3. TRANSPARENT AVATAR PROCESSOR
     // ============================================================
     function loadImageElement(src) {
       return new Promise((resolve) => {
@@ -2036,7 +2036,7 @@
         const isActive = idx === selectedRoleIdx;
         return `
           <div class="headshot-tile ${isActive ? "active" : ""}" onclick="selectRole(${idx})">
-            <video class="tile-video" src="video_1.mp4" autoplay muted loop playsinline></video>
+            <video class="tile-video" src="red_digital_rain_bright_loop_final.mp4" autoplay muted loop playsinline preload="auto"></video>
             <img src="${roleAvatars[role.id] || ""}" alt="${role.name}" />
             <div class="headshot-label">${role.shortName}</div>
           </div>

@@ -375,7 +375,7 @@
     .headshot-tile {
       position: relative;
       aspect-ratio: 1 / 1;
-      background: #07080b;
+      background: rgba(10, 10, 12, 0.92);
       border: 1px solid rgba(74, 85, 104, 0.7);
       border-radius: 4px;
       overflow: hidden;
@@ -414,6 +414,7 @@
       object-fit: cover;
       z-index: 1;
       pointer-events: none;
+      opacity: 0.85;
     }
 
     .headshot-tile img {
@@ -431,7 +432,7 @@
       z-index: 3;
       width: 100%;
       padding: 3px 4px;
-      background: rgba(10, 10, 12, 0.92);
+      background: rgba(10, 10, 12, 0.95);
       font-family: var(--font-mono);
       font-size: 9px;
       font-weight: 700;
@@ -1431,7 +1432,7 @@
     let roleAvatars = {};
 
     // ============================================================
-    // 3. TRANSPARENT AVATAR PROCESSOR
+    // 3. ROBUST UNIFORM AVATAR BACKGROUND CLEANER
     // ============================================================
     function loadImageElement(src) {
       return new Promise((resolve) => {
@@ -1463,8 +1464,13 @@
         const d = idata.data;
         for (let i = 0; i < d.length; i += 4) {
           const r = d[i], g = d[i + 1], b = d[i + 2];
-          const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
-          if (maxDiff < 12 && r > 150) {
+          
+          // Uniformly strip checkerboards, light grays, whites, and dark backgrounds
+          const isGray = Math.abs(r - g) < 12 && Math.abs(g - b) < 12 && Math.abs(r - b) < 12;
+          const isCheckerboardOrLight = (isGray && r > 125) || (r > 230 && g > 230 && b > 230);
+          const isDarkBackground = r < 16 && g < 16 && b < 16;
+
+          if (isCheckerboardOrLight || isDarkBackground) {
             d[i + 3] = 0;
           }
         }
